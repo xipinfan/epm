@@ -70,6 +70,11 @@
             </nav>
             <div id="toggle" class="iconfont" title="关闭选项栏">
                 <ul>
+                    <li title="工具初始化">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-chushihua1"></use>
+                        </svg>
+                    </li>
                     <li title="撤销">
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-weibiaoti545"></use>
@@ -212,7 +217,7 @@
 			</div>
 			<div class="model-footer">
 				<button  value="cancel">取&nbsp;消</button>
-				<button>确&nbsp;定</button>
+				<button id="acceptWarning">确&nbsp;定</button>
 			</div>
 		</div>
     </dialog>
@@ -225,11 +230,11 @@
 			</div>
 			<div class="splitter-right"></div>
 			<div class="model-content">
-				<input type="text" placeholder="在此处输入图片链接">
+				<input id="inputTextUrl1" type="text" placeholder="在此处输入图片链接">
 			</div>
 			<div class="model-footer">
-				<button  value="cancel">取&nbsp;消</button>
-				<button>确&nbsp;定</button>
+				<button value="cancel">取&nbsp;消</button>
+				<button id="acceptURL">确&nbsp;定</button>
 			</div>
 		</div>
     </dialog>
@@ -246,7 +251,7 @@
                     <div>文件名称</div>
                 </div>
                 <div id="inputTextpng">
-                    <input type="text" placeholder="在此处输入文件名称">.png
+                    <input id="imageName" type="text" placeholder="在此处输入文件名称">.png
                 </div>
                 <div id="model-content-input">
                     <div>
@@ -261,7 +266,7 @@
             </div>
 			<div class="model-footer"> 
 				<button  value="cancel">取&nbsp;消</button>
-				<button>确&nbsp;定</button>
+				<button id="acceptImage">确&nbsp;定</button>
 			</div>
 		</div>
     </dialog>
@@ -346,7 +351,7 @@
 			</div>
 			<div>
 				<label for="hb-color">画笔颜色：</label>
-				<input type="color" id="hb-color" value="#ff0000" />
+				<input type="color" id="hb-color" value="#000000" />
 			</div>
 		</div>
 	</template>

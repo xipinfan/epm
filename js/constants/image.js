@@ -1,6 +1,7 @@
 
 'use strict';
 
+import { $ } from "./config.js";
 export function contrast(a, b){  //等比例缩放图片
   let node = {};
   if(a <= this.width && b <= this.height){
@@ -30,11 +31,26 @@ export function contrast(a, b){  //等比例缩放图片
   return node;
 }
 
+export function imageinput(e, url){
+  let that = this;
+  that.initialImg = new Image();
+  that.initialImg.src = url || window.URL.createObjectURL(e.target.files[0]);
+  that.initialImg.onload = () => {
+    Board.call(that);
+    let node = contrast.call(that,that.initialImg.width,that.initialImg.height);
+    let x = that.width/2-node.a/2, y = that.height/2-node.b/2;
+    that.canvasVideoCtx.drawImage(that.initialImg,0,0,that.initialImg.width,that.initialImg.height,x,y,node.a,node.b);  
+    that.ImageData.splice(0);
+    that.ImageData.push(that.canvasVideoCtx.getImageData(0,0,that.width,that.height));
+  }
+}
+
 export function whiteBoard(canvasCtx){  //重置绘画板
   canvasCtx.save();
   canvasCtx.fillStyle = 'rgb(255,255,255)';
   canvasCtx.fillRect(0,0,this.width,this.height);
   canvasCtx.restore();
+
 }
 
 export function Board(){  //重置绘画板
@@ -42,7 +58,8 @@ export function Board(){  //重置绘画板
   this.canvasVideoCtx.clearRect(0,0,this.width,this.height);
 }
 
-export function saveImag(){  //图片保存函数
+export function saveImagMapping(){  //图片保存函数
+  
   let imageData = this.canvasVideoCtx.getImageData(0,0,this.width,this.height);
   let pxList = transToRowCol( transToRGBA( imageData.data ), this.width );
   let boundary = getBoundary(this.width, this.height, pxList);
@@ -116,8 +133,12 @@ export function saveImag(){  //图片保存函数
 
     return pxList;
   }
+  return canvasTemporarily;
+}
 
+export function saveImag(canvasTemporarily, name){
   let type = 'png';
+  console.log("??");
   let imgdata = canvasTemporarily.toDataURL(type);
   let fixtype = function(type){
     type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
@@ -132,8 +153,9 @@ export function saveImag(){  //图片保存函数
     link.href = data;
     link.download = filename;
     link.click();
+    alert('下载成功');
   }
-  let filename = new Date().toLocaleDateString() + '.' + type;  //保存的名称
+  let filename = name + '.' + type;  //保存的名称
 
   saveFile(imgdata, filename);
 }

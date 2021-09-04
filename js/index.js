@@ -17,12 +17,16 @@ export class Tools{
   }
   dataInit(){
     protote();  //设定原型链
-    this.state = false;
+    this.state = false;   //设定当前操作选项
+    this.stateType = '';    //设定当前为图像还是视频操作
+
     this.direction = [ 'upper','right','lower','left' ];  //设定操作画布朝向
     this.directionIndex = 0;  //设定操作画布当前朝向
     this.toolCurrent = '';  //设定当前工具
-    this.pensize = 2;  //初始化画笔大小
-    this.strokeColor = '#000';    //初始化画笔颜色
+
+    this.pensize = 6;  //初始化画笔大小
+    this.strokeColor = '#000000';    //初始化画笔颜色
+
     this.rubberIconSize = 8;  //橡皮图标显示
     this.penstate = false;   //直线绘制判断
     this.ImageData = [];  //保存每一次绘制的图像
@@ -32,6 +36,9 @@ export class Tools{
     this.textValue = '';  //记录textarea输入框的输入内容
     this.typebullet = 'top';
     this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
+
+    this.demo1 = '';
+    this.mainpanelState = '';
 
     this.dialog = undefined;
 
@@ -63,6 +70,8 @@ export class Tools{
     let contentH = Math.floor(content.getBoundingClientRect().height) - 5 ;
 
     contentInit(content,contentH,contentW);
+    let footerspan = Array.from($('footer>span'));
+    footerspan[0].innerHTML = contentW,footerspan[1].innerHTML = contentH;
 
     $('#main-content')[0].className = 'items-class';
 
@@ -113,19 +122,23 @@ export class Tools{
     this.canvasDemoCtx.lineJoin = 'round';  //设定线条与线条间接合处的样式。
     this.canvasVideoCtx.lineWidth = this.pensize;
     this.canvasDemoCtx.lineWidth = this.pensize;
+
+    this.canvasVideoCtx.strokeStyle = this.strokeColor;
+    this.canvasDemoCtx.strokeStyle = this.strokeColor;
+    this.canvasVideoCtx.strokeStyle = this.strokeColor;
+    this.canvasDemoCtx.strokeStyle = this.strokeColor;
   }
   
   //设置初始图片
   lableFound(){
-    let that = this;
     whiteBoard.call(this,this.canvasBackgroundCxt);
     this.backstageVideo = document.createElement('Video');
     this.initialImg = new Image();
-    this.initialImg.src = './fonts/hkd.png';
-    this.initialImg.onload = function(){
-      let node = contrast.call(that,that.initialImg.width,that.initialImg.height);
-      let x = that.width/2-node.a/2, y = that.height/2-node.b/2;
-      that.canvasVideoCtx.drawImage(that.initialImg,0,0,that.initialImg.width,that.initialImg.height,x,y,node.a,node.b); 
-    }
+    // this.initialImg.src = './fonts/hkd.png';
+    // this.initialImg.onload = function(){
+    //   let node = contrast.call(that,that.initialImg.width,that.initialImg.height);
+    //   let x = that.width/2-node.a/2, y = that.height/2-node.b/2;
+    //   that.canvasVideoCtx.drawImage(that.initialImg,0,0,that.initialImg.width,that.initialImg.height,x,y,node.a,node.b); 
+    // }
   }
 }
