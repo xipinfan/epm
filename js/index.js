@@ -26,8 +26,6 @@ export class Tools{
 
     this.pensize = 6;  //初始化画笔大小
     this.strokeColor = '#000000';    //初始化画笔颜色
-
-    this.rubberIconSize = 8;  //橡皮图标显示
     this.penstate = false;   //直线绘制判断
     this.ImageData = [];  //保存每一次绘制的图像
     this.forwardData = [];  //保存每一次回撤前的图像
@@ -36,6 +34,9 @@ export class Tools{
     this.textValue = '';  //记录textarea输入框的输入内容
     this.typebullet = 'top';
     this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
+
+    this.eraserStrength = 0.7;
+    this.eraserSize = 3;
 
     this.demo1 = '';
     this.mainpanelState = '';
@@ -132,8 +133,10 @@ export class Tools{
   //设置初始图片
   lableFound(){
     whiteBoard.call(this,this.canvasBackgroundCxt);
+    whiteBoard.call(this,this.canvasVideoCtx);
     this.backstageVideo = document.createElement('Video');
     this.initialImg = new Image();
+
     // this.initialImg.src = './fonts/hkd.png';
     // this.initialImg.onload = function(){
     //   let node = contrast.call(that,that.initialImg.width,that.initialImg.height);

@@ -89,7 +89,6 @@ export function recordPlay(){  //开始播放图片数组
     }
 
     if(that.barrage != null){
-      console.log('????');
       that.canvasDemoCtx.clearRect( 0, 0, that.canvasVideo.width, that.canvasVideo.height); 
       that.canvasSubtitleCtx.clearRect( 0, 0, that.canvasvideoData.w, that.canvasvideoData.h); 
       switch(that.barrage.typebullet){

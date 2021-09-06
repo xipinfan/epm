@@ -46,6 +46,7 @@ export function imageinput(e, url){
 }
 
 export function whiteBoard(canvasCtx){  //重置绘画板
+  this.canvasDemoCtx.clearRect(0,0,this.width,this.height);    //清除画布
   canvasCtx.save();
   canvasCtx.fillStyle = 'rgb(255,255,255)';
   canvasCtx.fillRect(0,0,this.width,this.height);
@@ -162,7 +163,7 @@ export function saveImag(canvasTemporarily, name){
 
 //区域方型涂白,橡皮擦函数
 export function eliminate(e){
-  this.canvasVideoCtx.clearRect(e.layerX,e.layerY,this.rubberIconSize,this.rubberIconSize);
+  this.canvasVideoCtx.clearRect(e.layerX,e.layerY,this.eraserSize,this.eraserSize);
   //this.canvasVideoCtx.fillStyle = 'rgba(255,255,255,0)';
   //this.canvasVideoCtx.fillRect(e.layerX,e.layerY,this.rubberIconSize,this.rubberIconSize);
 }
@@ -201,7 +202,7 @@ export function shear(firstplot, endplot, shearplot){  //剪切函数
   this.canvasVideoCtx.clearRect(shearplot.x1,shearplot.y1,w1,h1);    //将原图像清空 
 }
 
-export function paintBucket(ImageDate, x, y, color){  //油漆桶
+export function paintBucket(ImageDate, x, y, color, intensity){  //油漆桶
   let { width, height, data } = ImageDate;
   let [R, G, B] = color.substring(1).match(/[a-fA-F\d]{2}/g);
   R = Number.parseInt(R, 16);
@@ -227,7 +228,7 @@ export function paintBucket(ImageDate, x, y, color){  //油漆桶
       let y1 = pos.y + i[1];
       index = (y1 * width + x1 ) * 4;
       let colorto = this.rgbToGray( data[index],data[index+1],data[index+2] );
-      if(x1 >= 0 && y1 >=0 && x1 < width && y1 < height && !vis[y1][x1] && colorto - 20 <= grayColor && colorto + 20 >= grayColor ){  //通过灰度值判断
+      if(x1 >= 0 && y1 >=0 && x1 < width && y1 < height && !vis[y1][x1] && colorto - intensity <= grayColor && colorto + intensity >= grayColor ){  //通过灰度值判断
         vis[y1][x1] = 1;
         queue.push({ x:x1, y:y1 });
       }
@@ -343,7 +344,22 @@ export function dottedBox(x1, y1, x2, y2){  //虚线提示框
   this.canvasDemoCtx.restore();
 }
 
-export function boundary(canvas, e, firstplot, endplot, lineDistance, pointToLine){  //其他的所在地判断，随便修改鼠标样式
+export function lineDistance(beginspot, endspot){  //点到点距离公式
+  return Math.sqrt(Math.pow(beginspot.x-endspot.x, 2)+Math.pow(beginspot.y - endspot.y, 2));
+}
+
+export function pointToLine(beginline, endline, node){  //点到线距离函数
+  if(beginline.x-endline.x !== 0){
+    let k = (beginline.y-endline.y)/(beginline.x-endline.x);
+    let b = beginline.y - k*beginline.x;
+    return Math.abs( k*node.x - node.y + b )/Math.sqrt( Math.pow(k, 2)+1 );
+  }
+  else{
+    return Math.abs( node.x - beginline.x );
+  }
+}
+
+export function boundary(canvas, e, firstplot, endplot){  //其他的所在地判断，随便修改鼠标样式
   let node = {x:e.layerX, y:e.layerY};
   let minx = Math.min(firstplot.x, endplot.x), miny = Math.min(firstplot.y, endplot.y), 
     maxx = Math.max(firstplot.x, endplot.x), maxy = Math.max(firstplot.y, endplot.y);
@@ -466,20 +482,6 @@ export function drawDiamond(canvas, firstplot, endplot){
   canvas.stroke();
 }
 
-export function lineDistance(beginspot, endspot){  //点到点距离公式
-  return Math.sqrt(Math.pow(beginspot.x-endspot.x, 2)+Math.pow(beginspot.y - endspot.y, 2));
-}
-
-export function pointToLine(beginline, endline, node){  //点到线距离函数
-  if(beginline.x-endline.x !== 0){
-    let k = (beginline.y-endline.y)/(beginline.x-endline.x);
-    let b = beginline.y - k*beginline.x;
-    return Math.abs( k*node.x - node.y + b )/Math.sqrt( Math.pow(k, 2)+1 );
-  }
-  else{
-    return Math.abs( node.x - beginline.x );
-  }
-}
 //在canvas上绘制文本
 export function textFill( canvas, str, clinet, index){
   canvas.save();

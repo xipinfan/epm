@@ -13,12 +13,6 @@ export function on(el, func, use){
   el.addEventListener(func, use);
 }
 
-export function arrBind(...arr){
-  return arr.map(index=>
-    _$('#'+index)
-  );
-}
-
 export function checkUrl(url){
   let match2 = /^((http|https):\/\/)?(([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Za-z0-9]+)\.)+([A-Za-z]+)[/\?\:]?.*$/;
   return match2.test(url);

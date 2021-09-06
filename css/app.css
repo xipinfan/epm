@@ -262,6 +262,7 @@ main{
 	flex-direction: column;
 	box-sizing: border-box;
 	overflow: scroll;
+	padding-top: 3px;
 }
 .items-class{
 	align-items: center;
