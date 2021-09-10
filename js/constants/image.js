@@ -1,44 +1,33 @@
 
 'use strict';
 
-import { $ } from "./config.js";
+import { $, _$,widthChange,displayChange } from "./config.js";
 export function contrast(a, b){  //等比例缩放图片
   let node = {};
-  if(a <= this.width && b <= this.height){
-    node.a = a;
-    node.b = b;
+  while(a > this.width || b > this.height){
+    a = a * 0.8;
+    b = b * 0.8;
   }
-  else if(a > this.width && b <= this.height){
-    node.a = this.width;
-    node.b = b*(this.width/a);
-  }
-  else if(a <= this.width && b > this.height){
-    node.a = a*(this.height/b);
-    node.b = this.height;
-  }
-  else if(a > this.width && b > this.height){
-    let aw = a - this.width;
-    let bh = b - this.height;
-    if(aw >= bh){
-      node.a = this.width;
-      node.b = b*(this.width/a);
-    }
-    else{
-      node.a = a*(this.height/b);
-      node.b = this.height;
-    }
-  }
+  [node.a, node.b] = [ Math.floor(a), Math.floor(b)];
   return node;
 }
 
 export function imageinput(e, url){
-  let that = this;
-  that.initialImg = new Image();
-  that.initialImg.src = url || window.URL.createObjectURL(e.target.files[0]);
+  const that = this;
+  this.stateType = 'image';
+  this.initialImg = new Image();
+  this.initialImg.src = url || window.URL.createObjectURL(e.target.files[0]);
+  this.backstageVideo.src = '';
+  widthChange.call(this);
+  
   that.initialImg.onload = () => {
     Board.call(that);
-    let node = contrast.call(that,that.initialImg.width,that.initialImg.height);
-    let x = that.width/2-node.a/2, y = that.height/2-node.b/2;
+    const node = contrast.call(that,that.initialImg.width,that.initialImg.height);
+    const x = that.width/2-node.a/2, y = that.height/2-node.b/2;
+    [...that.imageAttribute] = [node.a, node.b, x, y];
+    if(_$('#main-panel').style.display !== 'none' && _$('#main-panel-title').innerHTML === '图像属性'){
+      that.imageTransformation();
+    }
     that.canvasVideoCtx.drawImage(that.initialImg,0,0,that.initialImg.width,that.initialImg.height,x,y,node.a,node.b);  
     that.ImageData.splice(0);
     that.ImageData.push(that.canvasVideoCtx.getImageData(0,0,that.width,that.height));
@@ -51,7 +40,6 @@ export function whiteBoard(canvasCtx){  //重置绘画板
   canvasCtx.fillStyle = 'rgb(255,255,255)';
   canvasCtx.fillRect(0,0,this.width,this.height);
   canvasCtx.restore();
-
 }
 
 export function Board(){  //重置绘画板
@@ -139,7 +127,6 @@ export function saveImagMapping(){  //图片保存函数
 
 export function saveImag(canvasTemporarily, name){
   let type = 'png';
-  console.log("??");
   let imgdata = canvasTemporarily.toDataURL(type);
   let fixtype = function(type){
     type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
@@ -184,7 +171,6 @@ export function updownImage(x, y){  //保存图片的数据
   if(x.length !== 0){
     let forwarddatenode = x.pop();
     y.push(this.canvasVideoCtx.getImageData(0,0,this.width,this.height));  //将当前的canvas数据保存在数组里
-    console.log(forwarddatenode);
     this.canvasVideoCtx.putImageData(forwarddatenode, 0, 0);  //将当前canvas数据替换为数组中的canvas数据
   }
 }
@@ -488,13 +474,19 @@ export function textFill( canvas, str, clinet, index){
   canvas.fillText(str, clinet.x, clinet.y + index);
   canvas.restore();
 }
+export function strokeText( canvas, str, clinet, index){
+  canvas.save();
+  canvas.strokeText(str, clinet.x, clinet.y + index);
+  canvas.restore();
+}
+
 
 export function textTool(textDottedLine, canvas, value, dd){  //绘制文本初始化
   let textQueue = [];
   let textWidth = Math.abs(textDottedLine.clinetTo.x - textDottedLine.clinet.x);
   canvas.save();
-  canvas.font = '20px serif';  //字体大小
-  canvas.fillStyle = document.querySelector('input[type=color]').value;
+  canvas.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
+  //canvas.fillStyle = document.querySelector('input[type=color]').value;
   let index = 0;
   textQueue[index] = '';
 
@@ -508,12 +500,18 @@ export function textTool(textDottedLine, canvas, value, dd){  //绘制文本初�
   
   for(let i = 0 ; i <= textQueue.length - 1 ; i++){
     if(i === textQueue.length - 1 && dd > 10){  //模拟光标闪烁
-      this.textFill(canvas, textQueue[i]+'|', textDottedLine.clinet , 20*(i+1));
+      if(this.textStyle === '1') 
+        textFill(canvas, textQueue[i]+'|', textDottedLine.clinet , this.fontSize*(i+1));
+      else
+        strokeText(canvas, textQueue[i]+'|', textDottedLine.clinet , this.fontSize*(i+1));
     }
     else{
-      this.textFill(canvas, textQueue[i], textDottedLine.clinet , 20*(i+1));
+      if(this.textStyle === '1') 
+        textFill(canvas, textQueue[i], textDottedLine.clinet , this.fontSize*(i+1));
+      else
+        strokeText(canvas, textQueue[i], textDottedLine.clinet , this.fontSize*(i+1));
     }
   }
   canvas.restore();
-  return textQueue.length*20;  //判断是否需要伸长框体
+  return textQueue.length*this.fontSize;  //判断是否需要伸长框体
 }

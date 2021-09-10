@@ -70,6 +70,26 @@
             </nav>
             <div id="toggle" class="iconfont" title="关闭选项栏">
                 <ul>
+                    <li title="截取" class="nonec intercept">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-line-cropjianqie-01"></use>
+                        </svg>
+                    </li>
+                    <li title="顺时针旋转" class="nonec rotate">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-shunshizhenxuanzhuan"></use>
+                        </svg>
+                    </li>
+                    <li title="逆时针旋转" class="nonec rotate">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-nishizhenxuanzhuan"></use>
+                        </svg>
+                    </li>
+                    <li title="旋转180°" class="nonec rotate">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-xuanzhuan"></use>
+                        </svg>
+                    </li>
                     <li title="工具初始化">
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-chushihua1"></use>
@@ -103,14 +123,14 @@
                     </li>
                 </ul>
             </div>
-            <div class="splitLine" style="width: 2px;height: 100%;"></div>
-            <div id="header-logo">ohhhh</div>
+            <!-- <div class="splitLine" style="width: 2px;height: 100%;"></div> -->
+            <div id="header-logo"></div>
         </header>
         <main>
             <nav id="main-nav">
                 <div class="splitLine"></div>
                 <ul>
-                    <li title="图像变换">
+                    <li title="图像属性">
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-fangxiang"></use>
                         </svg>
@@ -169,10 +189,10 @@
                     <div id="contains"></div>
                 </div>
                 <div id="player" style="display: none;" >
-                    <svg class="icon" aria-hidden="true" style="display:none;">
+                    <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-weibiaoti--"></use>
                     </svg>    
-                    <svg class="icon" aria-hidden="true">
+                    <svg class="icon" aria-hidden="true" style="display:none;">
                         <use xlink:href="#icon-weibiaoti--1"></use>
                     </svg>
                     <span class="timedisplay">00:00</span>
@@ -188,11 +208,49 @@
                 
             </div>
             <div id="main-right">
-                <div id="buttonLayer">
+                <div class="buttonLayer" style="display: none;">
                     <input type="button" value="导入图片">
                     <input type="button" value="导入视频">
                     <input type="text" placeholder="输入想要素材关键字">
                     <input type="button" value="搜索素材">
+                </div>
+                <div class="buttonLayer" style="display: none;">
+                    <input type="button" value="开启录制">
+                    <input type="button" value="暂停录制" style="display: none;background-color: rgb(120,120,120);">
+                    <input type="button" value="取消录制">
+                    <input type="button" value="截取当前帧">
+                    <input type="button" value="导出结果">
+                </div>
+                <div class="buttonLayer gifModify">
+                    <div id="mainControl">
+                        <button value="添加字幕" class="mainControlBackground" title="添加视频字幕">添加字幕</button>
+                        <button value="添加弹幕" title="为视频添加弹幕">添加弹幕</button>
+                        <button value="添加文字" title="将文字加入视频中">添加文字</button>
+                    </div>
+                    <div id="captionControl"  style="display: none;">
+                        <button value="顶部弹幕" class="mainControlBackground">顶部弹幕</button>
+                        <button value="底部弹幕">底部弹幕</button>
+                        <button value="滚动弹幕">滚动弹幕</button>
+                    </div>
+                    <input type="text" placeholder="请输入文字内容">
+                    <div id="wz-style">
+                        <div id="textSize1" title="16px">
+                            <label for="wz-size">文字大小：</label>
+                            <input type="range" id="wz-size" min="1" max="100" value="16" step="1" />
+                        </div>
+                        <div id="textSpeed1" title="5"  style="display: none;">
+                            <label for="wz-speed">移动速度：</label>
+                            <input type="range" id="wz-speed" min="1" max="30" value="5" step="1" />
+                        </div>
+                        <div id="textColor1">
+                            <label for="wz-color">文字颜色：</label>
+                            <input type="color" id="wz-color" value="#000000" />
+                        </div>    
+                    </div>
+                    <input style="margin-top: 5px;" type="button" value="添加">
+                    <input type="button" value="文字重新导入">
+                    <input type="button" value="重新录制">
+                    <input type="button" value="导出GIF文件">
                 </div>
             </div>
         </main>
@@ -305,13 +363,13 @@
 
     <template id="txbh-template">
 		<div id="txhb-panel" class="panel">
+            <div>
+				<label for="img-height">图像长度：</label>
+				<input type="number" value="2" id="img-height" min="0" disabled />
+			</div>
 			<div>
 				<label for="img-width">图像宽度：</label>
 				<input type="number" value="2" id="img-width" min="0" disabled />
-			</div>
-			<div>
-				<label for="img-height">图像长度：</label>
-				<input type="number" value="2" id="img-height" min="0" disabled />
 			</div>
 			<div>
 				<label for="img-posX">图像位置(X)：</label>
@@ -325,13 +383,13 @@
 	</template>
     <template id="jq-template">
 		<div id="jq-panel" class="panel">
+            <div>
+				<label for="jq-height">截取长度：</label>
+				<input type="number" id="jq-height" min="0" value="0" disabled />
+			</div>
 			<div>
 				<label for="jq-width">截取宽度：</label>
 				<input type="number" id="jq-width" min="0" value="0" disabled />
-			</div>
-			<div>
-				<label for="jq-height">截取长度：</label>
-				<input type="number" id="jq-height" min="0" value="0" disabled />
 			</div>
 			<div>
 				<label for="jq-posX">截取位置(X)：</label>
@@ -400,7 +458,7 @@
 			<div>
 				<label for="wbgj-font-family">字体样式：</label>
 				<select id="wbgj-font-family">
-					<option value="sans-serif" selected="">sans-serif</option>
+					<option value="sans-serif" selected>sans-serif</option>
 					<option value="Arial">Arial</option>
 					<option value="Arial Black">Arial Black</option>
 					<option value="Arial Narrow">Arial Narrow</option>
@@ -439,6 +497,10 @@
     <template id="xzgj-template">
 		<div id="xzgj-panel" class="panel">
             <!-- &nbsp;&nbsp; -->
+            <span>
+                <label for="hb-color">画笔颜色：</label>
+                <input type="color" id="xzgj-color" value="#000000" />
+            </span>
 			<div>
 				<span>
                     <svg class="icon" aria-hidden="true" style="font-size: 15px;">
@@ -488,6 +550,7 @@
                 </span>
 			</div>
 		</div>
+        
 	</template>
     <template id="czhb-template">
 		<div id="czhb-panel" class="panel">

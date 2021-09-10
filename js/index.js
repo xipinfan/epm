@@ -1,5 +1,5 @@
 //主类，用来初始化以及保存获取到的数据
-import {contrast,whiteBoard} from './constants/image.js';
+import {whiteBoard} from './constants/image.js';
 import {contentInit,protote,$,canvasDemoInit} from './constants/config.js'
 
 'use strict';
@@ -34,13 +34,33 @@ export class Tools{
     this.textValue = '';  //记录textarea输入框的输入内容
     this.typebullet = 'top';
     this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
-
+    this.imageAttribute = Array.from({length:4},x=>0); //分别为图像长宽与起使点
+    
+    this.progressoafter = $("#progressoafter")[0];    //绑定进度条
+    this.videoTimedisplay = $(".timedisplay");    //绑定视频时间显示
+    this.videoData = { w:0, h:0 };
     this.eraserStrength = 0.7;
     this.eraserSize = 3;
+    this.base = false;
+    this.videoIndex = "video";   //判断当前canvas播放类型video表示映射视频，canvas表示映射图片数组
+    this.saveto = [];   //保存视频截取的base64编码图片数组
+    this.canvasvideoData = { x:0, y:0 };   //保存图片在等比例缩小之前的宽高
+    this.barrage = null;   //弹幕参数
+    this.barrageType = '顶部弹幕';
+    this.barrageSpeed = 5;
+    this.canvasvideoNode = { x:0, y:0 };   //保存等比例缩小之后的宽高
+
+    this.fontSize = 16;
+    this.fontFamily = 'sans-serif';
+    this.fontWeight = '400';
+    this.textStyle = '1';
+
+    this.reduceWidth = 1;
+    this.jq = Array.from({length:4},x=>0); //分别为长宽与起使点
 
     this.demo1 = '';
     this.mainpanelState = '';
-
+    this.progressobarWidth = 0;
     this.dialog = undefined;
 
     this.tool = [  //工具初始化
@@ -59,7 +79,7 @@ export class Tools{
       'shear',     //剪切
     ];
     
-    this.progressobarWidth = $('#player')[0].getBoundingClientRect().width;
+    
   }
   //初始化canvas画布
   canvasInit(){
@@ -117,6 +137,7 @@ export class Tools{
   labelInit(){
     this.width=this.canvasVideo.width;
     this.height=this.canvasVideo.height;
+    this.imagedatasave = { w:this.width, h:this.height };
     this.canvasVideoCtx.lineCap = 'round';   //设置线条末端样式。
     this.canvasDemoCtx.lineCap = 'round';   //设置线条末端样式。
     this.canvasVideoCtx.lineJoin = 'round';  //设定线条与线条间接合处的样式。
@@ -124,8 +145,8 @@ export class Tools{
     this.canvasVideoCtx.lineWidth = this.pensize;
     this.canvasDemoCtx.lineWidth = this.pensize;
 
-    this.canvasVideoCtx.strokeStyle = this.strokeColor;
-    this.canvasDemoCtx.strokeStyle = this.strokeColor;
+    this.canvasVideoCtx.fillStyle = this.strokeColor;
+    this.canvasDemoCtx.fillStyle = this.strokeColor;
     this.canvasVideoCtx.strokeStyle = this.strokeColor;
     this.canvasDemoCtx.strokeStyle = this.strokeColor;
   }
@@ -136,12 +157,5 @@ export class Tools{
     whiteBoard.call(this,this.canvasVideoCtx);
     this.backstageVideo = document.createElement('Video');
     this.initialImg = new Image();
-
-    // this.initialImg.src = './fonts/hkd.png';
-    // this.initialImg.onload = function(){
-    //   let node = contrast.call(that,that.initialImg.width,that.initialImg.height);
-    //   let x = that.width/2-node.a/2, y = that.height/2-node.b/2;
-    //   that.canvasVideoCtx.drawImage(that.initialImg,0,0,that.initialImg.width,that.initialImg.height,x,y,node.a,node.b); 
-    // }
   }
 }

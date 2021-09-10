@@ -1,11 +1,25 @@
-
+import {contrast,textFill} from './image.js'
+import { $,_$ } from './config.js'
+ 
 'use strict';
+
+export function playPause(){
+  let player = Array.from($('#player>svg'));
+  if(this.backstageVideo.paused){
+    player[0].style.display = 'none';
+    player[1].style.display = 'inline';
+  }
+  else{
+    player[0].style.display = 'inline';
+    player[1].style.display = 'none';
+  }
+}
 
 //将视频投射到画布上
 export function openCanvasVideo(){
   let that = this;
   new Promise((resolve, reject)=>{
-    let inputVideo = document.querySelector('input');
+    let inputVideo = _$('input');
     this.backstageVideo.src = window.URL.createObjectURL(inputVideo.files[0]);  //获取视频所在路径并播放
     this.backstageVideo.controls = true;
     resolve();
@@ -15,14 +29,14 @@ export function openCanvasVideo(){
 }
 export function onloadOpenVideo(videoWidth,videoHeight){
   let that = this;
-  let node = that.contrast(videoWidth,videoHeight);
+  let node = contrast.call(this,videoWidth,videoHeight);
   render();
   function render(){  //将视频投放到canvas上
     let x = that.nodePlot.x - node.a/2, y = that.nodePlot.y - node.b/2;
 
     that.ed = window.requestAnimationFrame(render);  //每秒触发60次这个函数
     
-    that.videoTimedisplay[0].innerHTML = that.CanvasNode.timeChange(that.backstageVideo.currentTime);  //将当前视频时间显示在屏幕上
+    that.videoTimedisplay[0].innerHTML = timeChange(that.backstageVideo.currentTime);  //将当前视频时间显示在屏幕上
     that.progressoafter.style.width = (that.backstageVideo.currentTime/that.backstageVideo.duration) * that.progressobarWidth + 'px';
     if(that.backstageVideo.paused)window.cancelAnimationFrame(that.ed);
 
@@ -33,11 +47,7 @@ export function onloadOpenVideo(videoWidth,videoHeight){
     that.canvasVideoTapeCtx.drawImage(that.backstageVideo, 0, 0, videoWidth, videoHeight);  //设定录制canvas
 
     if(that.base){  //导出开始录制
-      document.getElementById('base64').style.backgroundColor = 'red'; 
       that.saveto.push(that.canvasVideoTape.toDataURL('image/png'));
-    }
-    else{
-      document.getElementById('base64').style.backgroundColor = 'blue';
     }
   }
 }
@@ -70,7 +80,7 @@ export function timeChangeFrame(time){  //修改时间
 export function recordPlay(){  //开始播放图片数组
   let that = this;
   let img = new Image();
-  let node = that.contrast(that.canvasvideoData.w,that.canvasvideoData.h);
+  let node = contrast.call(this,that.canvasvideoData.w,that.canvasvideoData.h);
   let x = that.nodePlot.x - node.a/2, y = that.nodePlot.y - node.b/2;
 
   func();
@@ -79,7 +89,7 @@ export function recordPlay(){  //开始播放图片数组
     that.AnimationFrameVideo = window.requestAnimationFrame(func);
 
     that.progressoafter.style.width = ((that.videoOnload + 1)/that.saveto.length) * that.progressobarWidth + 'px';
-    that.videoTimedisplay[0].innerHTML = that.CanvasNode.timeChange((that.videoOnload + 1)/60);  //将当前视频时间显示在屏幕上
+    that.videoTimedisplay[0].innerHTML = timeChange((that.videoOnload + 1)/60);  //将当前视频时间显示在屏幕上
 
     img.src = that.saveto[that.videoOnload];  //导入
     img.onload = function(){
@@ -88,7 +98,7 @@ export function recordPlay(){  //开始播放图片数组
       that.canvasVideoCtx.drawImage(img, 0, 0, that.canvasvideoData.w, that.canvasvideoData.h, x, y, node.a, node.b);         
     }
 
-    if(that.barrage != null){
+    if(that.barrage){
       that.canvasDemoCtx.clearRect( 0, 0, that.canvasVideo.width, that.canvasVideo.height); 
       that.canvasSubtitleCtx.clearRect( 0, 0, that.canvasvideoData.w, that.canvasvideoData.h); 
       switch(that.barrage.typebullet){
@@ -108,18 +118,18 @@ export function recordPlay(){  //开始播放图片数组
     that.videoOnload = that.videoOnload + 1;
     if(that.videoOnload >= that.saveto.length ){  //当到达结尾时结束
       that.videoOnload --;
-      document.querySelector('#progressopen').click();  //修改播放图标样式
+      $('#progressopen').click();  //修改播放图标样式
     }
   }
 }
 
-export function Recording(){  //导出mp4视频函数
+export function Recording(){  //导出GIF视频函数
   let that = this;
   let onload1 = 0;
   
-  this.CanvasNode.recordingVideo.call(this);
+  recordingVideo.call(this);
   let gif = new GIF({
-    worker: 2,
+    worker: 4,
     quality: 10,
     workerScript: './js/layer/gif.worker.js'
   })
@@ -128,9 +138,8 @@ export function Recording(){  //导出mp4视频函数
     let img = new Image();
     img.src = that.saveto[i];
     img.onload = function(){
-      let node = that.contrast(that.canvasvideoData.w,that.canvasvideoData.h);
+      let node = contrast.call(that,that.canvasvideoData.w,that.canvasvideoData.h);
       let x = that.nodePlot.x - node.a/2, y = that.nodePlot.y - node.b/2;
-
       that.canvasVideoTapeCtx.clearRect(0, 0,that.canvasVideo.width,that.canvasVideo.height);  //清空canvas
       if(that.canvasvideoData.h === this.height && that.canvasvideoData.w === this.width){
         that.canvasVideoTapeCtx.drawImage(img, 0, 0);  //设定图片距离
@@ -138,9 +147,7 @@ export function Recording(){  //导出mp4视频函数
       else{
         that.canvasVideoTapeCtx.drawImage(img, x, y, node.a, node.b);
       }
-
       gif.addFrame(that.canvasVideoTape, {copy:true, delay:120});
-
       if( i + 5 >= that.saveto.length - 1 ){
         gif.render();
       }
@@ -201,7 +208,6 @@ export function recordingVideo(){
       new Blob(data, {type:'video/webm'})
     );
     this.backstageVideo.src = url;
-    console.log(url);
   }
   this.recorder.start();  //开启录制
 }
@@ -217,9 +223,9 @@ export function pictureLoad(){  //重新导入页面
   let img = new Image();
   img.src = this.saveto[this.videoOnload];
   img.onload = function(){
-    let node = that.contrast(this.width,this.height);
+    let node = contrast.call(that,this.width,this.height);
     let x = that.nodePlot.x - node.a/2, y = that.nodePlot.y - node.b/2;
-    that.videoTimedisplay[0].innerHTML = that.CanvasNode.timeChange((that.videoOnload + 1)/60);  //将当前视频时间显示在屏幕上
+    that.videoTimedisplay[0].innerHTML = timeChange((that.videoOnload + 1)/60);  //将当前视频时间显示在屏幕上
 
     if(!!!that.canvasvideoData){  //修改视频的初始数据
       
@@ -247,7 +253,6 @@ export function pictureLoad(){  //重新导入页面
       }
       that.canvasDemoCtx.drawImage(that.canvasSubtitle, 0, 0,that.videoData.w,that.videoData.h, x, y, node.a, node.b);
     }
-
   }
 }
 
@@ -255,23 +260,22 @@ export function canvasGIF(){  //导出图片数组之后的初始化
   this.videoOnload = 0;
   this.AnimationFrameVideo = null;
   this.playbackStatus = false;
-  document.querySelector('#inputVido').value = '';
-  this.backstageVideo.src = '';
   this.videoTimedisplay[0].innerHTML = '00:00';
-  this.videoTimedisplay[1].innerHTML = this.CanvasNode.timeChange(this.saveto.length/60);
+  this.videoTimedisplay[1].innerHTML = timeChange(this.saveto.length/60);
   this.progressoafter.style.width = '0px';
   this.videoIndex = 'canvas';
 }
 
 export function saveBase64(){  //进行base64编码
   if(!this.base){
-    this.base = true;  
+    this.base = true;
+    this.backstageVideo.play(); 
+    onloadOpenVideo.call(this,this.videoData.w,this.videoData.h);  
   }
   else{
     this.base = false;
     window.cancelAnimationFrame(this.ed);
     this.backstageVideo.pause();
-    document.getElementById('base64').style.backgroundColor = 'blue';
   }
 }
 
@@ -288,7 +292,7 @@ export function progressbarCanvas(percent, e){  //映射图片数组的进度条
   this.videoOnload = parseInt(percent * this.saveto.length);
   if(this.videoOnload < 0 )this.videoOnload = 0;
   if(this.videoOnload >= this.saveto.length) this.videoOnload = this.saveto.length - 1;
-  this.CanvasNode.pictureLoad.call(this);
+  pictureLoad.call(this);
 }
 
 export function textQueueObtain(canvas, w, value){  //文本换行判断
@@ -308,7 +312,7 @@ export function textQueueObtain(canvas, w, value){  //文本换行判断
 
 export function addSubtitles(canvas, value, Text){  //字幕操作画布函数
 
-  let node = this.contrast(this.videoData.w,this.videoData.h);
+  let node = contrast.call(this,this.videoData.w,this.videoData.h);
   let x1 = this.nodePlot.x - node.a/2, y1 = this.nodePlot.y - node.b/2;
 
   this.canvasSubtitleCtx.clearRect(0, 0,this.canvasvideoData.w,this.canvasvideoData.h);
@@ -316,12 +320,12 @@ export function addSubtitles(canvas, value, Text){  //字幕操作画布函数
   canvas.save();
   canvas.font = Text + 'px serif';  //字体大小
 
-  let textQueue = this.CanvasNode.textQueueObtain(canvas, this.canvasvideoData.w, value);
+  let textQueue = textQueueObtain(canvas, this.canvasvideoData.w, value);
 
   for(let i = 0 ; i < textQueue.length ; i++){
     let nP = { x:this.canvasvideoData.w/2 - canvas.measureText(textQueue[i]).width/2,
           y:this.canvasvideoData.h - (textQueue.length - 1 ) * Text - 2 };
-    this.ImageLayerNode.textFill(canvas, textQueue[i], nP, i * Text);
+    textFill(canvas, textQueue[i], nP, i * Text);
   }
 
   this.canvasDemoCtx.drawImage(this.canvasSubtitle, 0, 0,this.videoData.w,this.videoData.h, x1, y1, node.a, node.b);
@@ -336,12 +340,12 @@ export function endFrame(img, value, Text, index){  //字幕完成添加函数
   this.canvasSubtitleCtx.save();
   this.canvasSubtitleCtx.font = Text + 'px serif';  //字体大小
   
-  let textQueue = this.CanvasNode.textQueueObtain(this.canvasSubtitleCtx, this.canvasvideoData.w, value);
+  let textQueue = textQueueObtain(this.canvasSubtitleCtx, this.canvasvideoData.w, value);
 
   for(let i = 0 ; i < textQueue.length ; i++){
     let nP = { x:this.canvasvideoData.w/2 - this.canvasSubtitleCtx.measureText(textQueue[i]).width/2 ,
         y:this.canvasvideoData.h- (textQueue.length-1) * Text } ;
-    this.ImageLayerNode.textFill(this.canvasSubtitleCtx, textQueue[i], nP, i * Text);
+    textFill(this.canvasSubtitleCtx, textQueue[i], nP, i * Text);
   }
 
   this.canvasSubtitleCtx.restore();
@@ -350,13 +354,13 @@ export function endFrame(img, value, Text, index){  //字幕完成添加函数
 
 export function speedCalculation(nP, value, speed){  //计算滚动弹幕时间
 
-  let node = this.contrast(this.videoData.w,this.videoData.h);
+  let node = contrast.call(this,this.videoData.w,this.videoData.h);
   let x1 = this.nodePlot.x - node.a/2, y1 = this.nodePlot.y - node.b/2;
   let Ti = this.videoOnload, x = nP.x;
   let length = this.canvasSubtitleCtx.measureText(value).width;
 
   this.canvasSubtitleCtx.clearRect(0, 0, this.canvasvideoData.w, this.canvasvideoData.h);
-  this.ImageLayerNode.textFill(this.canvasSubtitleCtx, value, nP, 0);
+  textFill(this.canvasSubtitleCtx, value, nP, 0);
   this.canvasDemoCtx.drawImage(this.canvasSubtitle, 0, 0,this.videoData.w,this.videoData.h, x1, y1, node.a, node.b);
 
   while(Ti != this.saveto.length){  //计算从起使到结束点时间
@@ -371,12 +375,12 @@ export function speedCalculation(nP, value, speed){  //计算滚动弹幕时间
 }
 
 export class Barrage{
-  constructor(ctx, value, typebullet, plot, time, speed, font){
+  constructor(ctx, value, typebullet, plot = { x:0, y:0}, time, speed, font){
     this.ctx = ctx;
     this.color = '#000000';
     this.value = value;
-    this.x = plot.x; //x坐标
-    this.y = plot.y;
+    this.x = plot.x ; //x坐标
+    this.y = plot.y ;
     this.speed = speed;
     this.fontSize = font;  //字体
     this.time = time;  //时间

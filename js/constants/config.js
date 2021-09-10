@@ -13,6 +13,25 @@ export function on(el, func, use){
   el.addEventListener(func, use);
 }
 
+export function displayChange(a, b, c){
+  a.style.display = 'none';
+  b.style.display = 'none';
+  c.style.display = 'block';
+}
+
+export function widthChange(){
+  let videoControl = $('#main-right>div');
+  _$('input[name=VideoFile]').value = '';
+  _$('#player').style.display = 'none';
+  [this.width, this.height] = [this.imagedatasave.w, this.imagedatasave.h];
+  displayChange(videoControl[1],videoControl[2],videoControl[0]);
+  _$('#content').style.height = this.height + 'px';
+  Array.from($('#contains>canvas')).forEach((index)=>{
+    index.height = this.height;
+  }) 
+}
+
+
 export function checkUrl(url){
   let match2 = /^((http|https):\/\/)?(([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Za-z0-9]+)\.)+([A-Za-z]+)[/\?\:]?.*$/;
   return match2.test(url);
