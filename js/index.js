@@ -1,6 +1,6 @@
 //主类，用来初始化以及保存获取到的数据
 import {whiteBoard} from './constants/image.js';
-import {contentInit,protote,$,canvasDemoInit} from './constants/config.js'
+import {contentInit,protote,_$,$,canvasDemoInit,Get} from './constants/config.js'
 
 'use strict';
 
@@ -18,19 +18,27 @@ export class Tools{
   dataInit(){
     protote();  //设定原型链
     this.state = false;   //设定当前操作选项
-    this.stateType = '';    //设定当前为图像还是视频操作
+    this.stateType = 'image';    //设定当前为图像还是视频操作
 
     this.direction = [ 'upper','right','lower','left' ];  //设定操作画布朝向
     this.directionIndex = 0;  //设定操作画布当前朝向
     this.toolCurrent = '';  //设定当前工具
 
+    this.imageRecord = { w:0, h:0 };
+
     this.pensize = 6;  //初始化画笔大小
+    this.pensize111 = 3;  //初始化画笔大小
     this.strokeColor = '#000000';    //初始化画笔颜色
     this.penstate = false;   //直线绘制判断
     this.ImageData = [];  //保存每一次绘制的图像
     this.forwardData = [];  //保存每一次回撤前的图像
     this.centralPoint = { x1:-1 , y1:-1 , x2:-1 , y2:-1 };  //图像翻转坐标记录
-    this.textDottedLine = {};  //文本的坐标记录
+
+    this.nodeServerPort = '8059';   //保存当前服务器接口
+    this.imgIndex = 1;    //当前页面模板图片所在页数
+
+    this.textDottedLine = { clinet:{x:0,y:0},clinetTo:{x:0,y:0} };  //文本的坐标记录
+    this.videoBarragePlot = { x: -1, y : -1 };    //弹幕画布坐标系统
     this.textValue = '';  //记录textarea输入框的输入内容
     this.typebullet = 'top';
     this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
@@ -44,11 +52,19 @@ export class Tools{
     this.base = false;
     this.videoIndex = "video";   //判断当前canvas播放类型video表示映射视频，canvas表示映射图片数组
     this.saveto = [];   //保存视频截取的base64编码图片数组
-    this.canvasvideoData = { x:0, y:0 };   //保存图片在等比例缩小之前的宽高
     this.barrage = null;   //弹幕参数
-    this.barrageType = '顶部弹幕';
+    this.barrageType = '逆轴滚动弹幕';    //滚动形式
     this.barrageSpeed = 5;
-    this.canvasvideoNode = { x:0, y:0 };   //保存等比例缩小之后的宽高
+    this.haole = false;
+
+    this.againImageData = '';
+
+    this.rotateIF = false;
+
+    this.proportion = 1;    //视频与画布缩小比例
+
+    this.barrageData = [];
+    this.barrForwardData = [];
 
     this.fontSize = 16;
     this.fontFamily = 'sans-serif';
@@ -58,10 +74,18 @@ export class Tools{
     this.reduceWidth = 1;
     this.jq = Array.from({length:4},x=>0); //分别为长宽与起使点
 
-    this.demo1 = '';
+    this.saveImageData = '';
     this.mainpanelState = '';
     this.progressobarWidth = 0;
     this.dialog = undefined;
+    this.imageStatus = 'stroke';
+
+    this.videoTimedate = {};
+    this.videoInitial = { height:0, width:0 };
+    this.fps = 60;
+    this.bottomDistance = 5;  //字幕距离底边的距离
+
+    this.worker = {};
 
     this.tool = [  //工具初始化
       'pencil',   //画笔工具
@@ -84,14 +108,14 @@ export class Tools{
   //初始化canvas画布
   canvasInit(){
     //设定canvas所在的盒模型大小
-    let parentNode = $('#contains')[0];
+    const parentNode = $('#contains')[0];
 
-    let content = $('#content')[0];
-    let contentW = Math.floor(content.getBoundingClientRect().width) - 8 ;
-    let contentH = Math.floor(content.getBoundingClientRect().height) - 5 ;
+    const content = $('#content')[0];
+    const contentW = Math.floor(content.getBoundingClientRect().width) - 8 ;
+    const contentH = Math.floor(content.getBoundingClientRect().height) - 5 ;
 
     contentInit(content,contentH,contentW);
-    let footerspan = Array.from($('footer>span'));
+    const footerspan = Array.from($('footer>span'));
     footerspan[0].innerHTML = contentW,footerspan[1].innerHTML = contentH;
 
     $('#main-content')[0].className = 'items-class';
@@ -104,8 +128,9 @@ export class Tools{
 
     //设定字幕canvas
     this.canvasSubtitle = document.createElement('canvas');
-    this.canvasSubtitle.style.zIndex = '1001';
     this.canvasSubtitleCtx = this.canvasSubtitle.getContext('2d');
+    //this.canvasSubtitleCtx = canvasDemoInit(this.canvasSubtitle,contentW,contentH,'absolute','1001');
+
 
     // //设定背景图canvas
     this.canvasBackground = document.createElement('canvas');
@@ -122,9 +147,16 @@ export class Tools{
     this.canvasDemo.className = 'canvasStyle';
     this.canvasDemoCtx = canvasDemoInit(this.canvasDemo,contentW,contentH,'absolute','1');
 
+    //设置视频文字映射画布
+    this.canvasTextMapping = document.createElement('canvas');
+    this.canvasTextMapping.className = 'canvasStyle';
+    this.canvasTextMappingCtx = canvasDemoInit(this.canvasTextMapping,contentW,contentH,'absolute','0');
+
     parentNode.appendChild(this.canvasVideo);
     parentNode.appendChild(this.canvasBackground);
+    parentNode.appendChild(this.canvasTextMapping);
     parentNode.appendChild(this.canvasDemo);
+    //parentNode.appendChild(this.canvasSubtitle);
 
     this.textarea = document.createElement('textarea');  //隐藏输入文本框
     this.textarea.style.opacity = 0;  //透明度为0，直接就行隐藏
@@ -138,10 +170,10 @@ export class Tools{
     this.width=this.canvasVideo.width;
     this.height=this.canvasVideo.height;
     this.imagedatasave = { w:this.width, h:this.height };
-    this.canvasVideoCtx.lineCap = 'round';   //设置线条末端样式。
-    this.canvasDemoCtx.lineCap = 'round';   //设置线条末端样式。
-    this.canvasVideoCtx.lineJoin = 'round';  //设定线条与线条间接合处的样式。
-    this.canvasDemoCtx.lineJoin = 'round';  //设定线条与线条间接合处的样式。
+    this.canvasVideoCtx.lineCap = 'butt';   //设置线条末端样式。
+    this.canvasDemoCtx.lineCap = 'butt';   //设置线条末端样式。
+    this.canvasVideoCtx.lineJoin = 'butt';  //设定线条与线条间接合处的样式。
+    this.canvasDemoCtx.lineJoin = 'butt';  //设定线条与线条间接合处的样式。
     this.canvasVideoCtx.lineWidth = this.pensize;
     this.canvasDemoCtx.lineWidth = this.pensize;
 
@@ -153,9 +185,26 @@ export class Tools{
   
   //设置初始图片
   lableFound(){
+    const that = this;
     whiteBoard.call(this,this.canvasBackgroundCxt);
     whiteBoard.call(this,this.canvasVideoCtx);
-    this.backstageVideo = document.createElement('Video');
+    this.backstageVideo = document.createElement('video');
+    this.backstageVideo.style.position = 'absolute';
+    this.backstageVideo.style.zIndex = -20;
+    $('#contains')[0].appendChild(this.backstageVideo);
     this.initialImg = new Image();
+
+    Get(`http://localhost:${this.nodeServerPort}/submit`, function(){
+      if(this.readyState === 4){
+          let expressionModel = JSON.parse(this.responseText) || [];
+          const selectModel = _$('select[title=默认模板]');
+          for(let i of expressionModel){
+            let optionModel = document.createElement('option');
+            optionModel.value = i.cate2;
+            optionModel.innerHTML = i.cate2;
+            selectModel.appendChild(optionModel);
+          }
+        }
+    })
   }
 }

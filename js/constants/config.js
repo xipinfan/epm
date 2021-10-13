@@ -1,5 +1,6 @@
 
 'use strict';
+import {whiteBoard} from './image.js'
 
 export function $(el){
   return document.querySelectorAll(el);
@@ -13,27 +14,32 @@ export function on(el, func, use){
   el.addEventListener(func, use);
 }
 
-export function displayChange(a, b, c){
+export function displayChange(a, b, c){   //修改右边栏显示
   a.style.display = 'none';
   b.style.display = 'none';
   c.style.display = 'block';
 }
 
 export function widthChange(){
-  let videoControl = $('#main-right>div');
-  _$('input[name=VideoFile]').value = '';
-  _$('#player').style.display = 'none';
-  [this.width, this.height] = [this.imagedatasave.w, this.imagedatasave.h];
-  displayChange(videoControl[1],videoControl[2],videoControl[0]);
-  _$('#content').style.height = this.height + 'px';
-  Array.from($('#contains>canvas')).forEach((index)=>{
+  this.backstageVideo.src = '';
+  this.backstageVideo.display = 'none';
+  const videoControl = $('#main-right>div');
+  _$('input[name=VideoFile]').value = '';   //input清除
+  
+  _$('#player').style.display = 'none';   //清除进度条
+  [this.width, this.height] = [this.imagedatasave.w, this.imagedatasave.h];   //修改保存的宽高
+  displayChange(videoControl[1],videoControl[2],videoControl[0]);  //修改右边栏的按钮
+  _$('#content').style.height = this.height + 'px';   //修改canvas容器的高度
+  Array.from($('#contains>canvas')).forEach((index)=>{   //修改画布的高度
     index.height = this.height;
   }) 
+  whiteBoard.call(this,this.canvasBackgroundCxt);   //初始化画布
+  whiteBoard.call(this,this.canvasVideoCtx);
 }
 
 
 export function checkUrl(url){
-  let match2 = /^((http|https):\/\/)?(([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Za-z0-9]+)\.)+([A-Za-z]+)[/\?\:]?.*$/;
+  const match2 = /^((http|https):\/\/)?(([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Za-z0-9]+)\.)+([A-Za-z]+)[/\?\:]?.*$/;
   return match2.test(url);
 }
 
@@ -46,6 +52,13 @@ export function canvasDemoInit(canvas, ...item){
   return canvas.getContext('2d');
 }
 
+export function Get(url, callback){
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = callback;
+  xhr.open('get', url, true);
+  xhr.send(null);
+}
+
 export function contentInit(content,contentH,contentW){
   content.style.height = contentH + 'px';
   content.style.width = contentW + 'px';
@@ -56,7 +69,7 @@ export function contentInit(content,contentH,contentW){
 export function protote(){
   String.prototype.colorHex = function () {
   // RGB颜色值的正则
-    let reg = /^(rgb|RGB)/;
+  const reg = /^(rgb|RGB)/;
     let color = this;
     if (reg.test(color)) {
       let strHex = '#';
@@ -81,7 +94,7 @@ export function protote(){
   };
   String.prototype.colorRgb = function () {
     // 16进制颜色值的正则
-    let reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+    const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
     // 把颜色值变成小写
     let color = this.toLowerCase();
     if (reg.test(color)) {
@@ -108,9 +121,9 @@ export function protote(){
   if (!CanvasRenderingContext2D.prototype.ellipse) {  //椭圆绘制函数
     CanvasRenderingContext2D.prototype.ellipse = function(x, y, radiusX, radiusY, rotation, startAngle, endAngle,
       anticlockwise) {
-      let r = radiusX > radiusY ? radiusX : radiusY; //用打的数为半径
-      let scaleX = radiusX / r; //计算缩放的x轴比例
-      let scaleY = radiusY / r; //计算缩放的y轴比例
+      const r = radiusX > radiusY ? radiusX : radiusY; //用打的数为半径
+      const scaleX = radiusX / r; //计算缩放的x轴比例
+      const scaleY = radiusY / r; //计算缩放的y轴比例
       this.save(); //保存副本          
       this.translate(x, y); //移动到圆心位置
       this.rotate(rotation); //进行旋转
@@ -118,5 +131,18 @@ export function protote(){
       this.arc(0, 0, r, startAngle, endAngle, anticlockwise); //绘制圆形
       this.restore(); //还原副本
     }
+  }
+  CanvasRenderingContext2D.prototype.ellipsefill = function(x, y, radiusX, radiusY, rotation, startAngle, endAngle,
+    anticlockwise) {
+    const r = radiusX > radiusY ? radiusX : radiusY; //用打的数为半径
+    const scaleX = radiusX / r; //计算缩放的x轴比例
+    const scaleY = radiusY / r; //计算缩放的y轴比例
+    this.save(); //保存副本          
+    this.translate(x, y); //移动到圆心位置
+    this.rotate(rotation); //进行旋转
+    this.scale(scaleX, scaleY); //进行缩放
+    this.arc(0, 0, r, startAngle, endAngle, anticlockwise); //绘制圆形
+    this.fill();
+    this.restore(); //还原副本
   }
 }
