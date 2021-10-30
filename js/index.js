@@ -193,7 +193,7 @@ export class Tools{
     this.backstageVideo.style.zIndex = -20;
     $('#contains')[0].appendChild(this.backstageVideo);
     this.initialImg = new Image();
-
+    this.initialImg.setAttribute('crossOrigin', 'anonymous')
     Get(`http://localhost:${this.nodeServerPort}/submit`, function(){
       if(this.readyState === 4){
           let expressionModel = JSON.parse(this.responseText) || [];

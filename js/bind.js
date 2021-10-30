@@ -28,7 +28,8 @@ class Bind extends Tools{
       on(img, 'dragstart', function(e){
         console.log(e.offsetX, e.offsetY)
         e.dataTransfer.setData('url', e.target.src);
-        e.dataTransfer.setData('offset',{ x:e.offsetX,y:e.offsetY });
+        e.dataTransfer.setData('offsetX',e.offsetX / 100);
+        e.dataTransfer.setData('offsetY',e.offsetY / 100);
       })
     })
     on(ImageModel, 'change', function(){
@@ -80,9 +81,9 @@ class Bind extends Tools{
       },50);
     })
 
-    on(_$('#acceptImage'),'click',async function(){    //打开图片结束
+    on(_$('#acceptImage'),'click',function(){    //打开图片结束
       const name = _$('#imageName').value;
-      await images.saveImag(that.saveImageData,name);
+      images.saveImag(that.saveImageData,name);
       that.dialog.close();
     })
 
@@ -90,11 +91,13 @@ class Bind extends Tools{
       images.imageinput.call(that,e);
     });
 
+
     on(_$('input[name=VideoFile]'), 'input', function(){    //导入视频
       
       that.haole = false;  //设定视频只能就绪一次
+      if(that.stateType !== 'video')that.height -= 40;    //修改高度，因为和图片不同需要有一个进度条，所以得修改高度
       that.stateType = 'video';  //设定当前播放方式
-      that.height -= 40;    //修改高度，因为和图片不同需要有一个进度条，所以得修改高度
+      
 
       _$('input[name=ImageFile]').value = '';  //清除选定的图片
       _$('#player').style.display = 'flex';   //拉起进度条
@@ -340,17 +343,7 @@ class Bind extends Tools{
           break;
         }
         case '保存':{
-          on(index, 'click', ()=>{
-            this.canvasVideoCtx.fillRect(50,20,100,50);
-            this.canvasVideoCtx.save();
-            this.canvasVideoCtx.translate(this.canvasVideo.width/2, this.canvasVideo.height/2);
-            this.canvasVideoCtx.rotate(20*Math.PI/180);
-            this.canvasVideoCtx.fillStyle = '#000';
-            this.canvasVideoCtx.fillRect(50,20,100,50);
-            this.canvasVideoCtx.restore();  
-          })
-          //this.dialogBind(index, saveToImage);
-          
+          this.dialogBind(index, saveToImage);
           break;
         }
       }
@@ -431,6 +424,11 @@ class Bind extends Tools{
       imgs.forEach((e,index)=>{
         try{
           e.style.opacity = 1;
+          // Get(`http://localhost:8059/base64?url=${that.searchImage[index + ad].image_url}`, function(){
+          //   if(this.readyState === 4){
+          //     console.log(JSON.parse(this.responseText) || []);
+          //   }
+          // })
           e.src = that.searchImage[index + ad].image_url;
         }
         catch{
@@ -1049,22 +1047,25 @@ class Bind extends Tools{
     
     on(_$('#content'), 'drop', function(e){
       e.preventDefault();
-      console.log(e.dataTransfer.getData('url'));
-      console.log(e.dataTransfer.getData('offset'));
-      console.log(e.layerX);
+      const event = { x:e.layerX, y: e.layerY };
+      const afterPlot = { x:e.dataTransfer.getData('offsetX'), y:e.dataTransfer.getData('offsetY')};
       that.initialImg.src = e.dataTransfer.getData('url');
       that.initialImg.onload = function(eve){
         that.canvasDemo.style.zIndex = 1003;
-        console.log(this.height);
-        console.log(this.width);
-        [firstplot.x, firstplot.y, endplot.x, endplot.y] = 
-          [];
+
+        [ firstplot.x, firstplot.y, endplot.x, endplot.y ] = 
+          [ event.x - this.width * afterPlot.x , event.y - this.height * afterPlot.y,
+             event.x + this.width - this.width * afterPlot.x, event.y + this.height - this.height * afterPlot.y ];
+        
         [that.imageRecord.w, that.imageRecord.h] = [this.width, this.height];
         that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
         that.canvasDemoCtx.drawImage(that.initialImg,0,0,that.imageRecord.w,that.imageRecord.h,
           firstplot.x,firstplot.y,endplot.x - firstplot.x,endplot.y - firstplot.y);  
         
         images.dottedBox.call(that, firstplot.x, firstplot.y, endplot.x, endplot.y);    //虚线提示框
+        that.state = true;
+        that.toolCurrent = 'image';
+        controlnode = false;
       }
     })
 
@@ -1242,10 +1243,11 @@ class Bind extends Tools{
       operation = false;
     })
     on( this.canvasDemo, 'mousemove',function(e){
-
+      console.log(controlnode);
       if(!that.state)return;
       if(controlnode){
         if(that.toolCurrent === 'image'){    //图片处理特殊判断
+          console.log("??");
           const node = images.contrast.call(that,that.imageRecord.w,that.imageRecord.h);
           const x = that.width/2-node.a/2, y = that.height/2-node.b/2;
           controlnode = false;

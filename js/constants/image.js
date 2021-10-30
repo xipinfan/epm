@@ -17,32 +17,45 @@ export function contrast(a, b){  //等比例缩放图片
 export function imageinput(e, url){    //
   const that = this;
   this.stateType = 'image';
-  this.initialImg = new Image();
-  this.initialImg.src = url || window.URL.createObjectURL(e.target.files[0]);
-  this.backstageVideo.src = '';
-
-  that.initialImg.onload = function(){
-    Board.call(that);
-    const node = contrast.call(that,this.width,this.height);  //获取到缩放后的图片宽高
-    const x = that.width/2-node.a/2, y = that.height/2-node.b/2;  //计算出图片在画布中的位置
-    
-
-    [...that.imageAttribute] = [node.a, node.b, x, y];
-    [that.imageRecord.w, that.imageRecord.h] = [this.width,this.height];
-
-
-    if(_$('#main-panel').style.display !== 'none' && _$('#main-panel-title').innerHTML === '图像属性'){
-      that.imageTransformation();
+  if(!url){
+    let Reader = new FileReader();
+    Reader.readAsDataURL(e.target.files[0]);
+    Reader.onload = function(){
+      imgInit(Reader.result);
     }
+  }
+  else{
+    imgInit(url);
+  }
 
-    that.canvasDemo.style.zIndex = 1001;    //在导入图片之后将图片先放在操作画布上进行操作
-    that.drawStraightLine('image'); //图片修改状态
-    that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
-    that.canvasDemoCtx.drawImage(that.initialImg,0,0,this.width,this.height,x,y,node.a,node.b);  
-    that.ImageData.splice(0);
-    that.canvasDemo.style.zIndex = 1001; 
+  function imgInit(src){
+    that.initialImg = new Image();
+    that.initialImg.src = src;
+    that.backstageVideo.src = '';
 
-    dottedBox.call(that, x, y, x + node.a, y + node.b);
+    that.initialImg.onload = function(){
+      //Board.call(that);
+      const node = contrast.call(that,this.width,this.height);  //获取到缩放后的图片宽高
+      const x = that.width/2-node.a/2, y = that.height/2-node.b/2;  //计算出图片在画布中的位置
+      
+
+      [...that.imageAttribute] = [node.a, node.b, x, y];
+      [that.imageRecord.w, that.imageRecord.h] = [this.width,this.height];
+
+
+      if(_$('#main-panel').style.display !== 'none' && _$('#main-panel-title').innerHTML === '图像属性'){
+        that.imageTransformation();
+      }
+
+      that.canvasDemo.style.zIndex = 1001;    //在导入图片之后将图片先放在操作画布上进行操作
+      that.drawStraightLine('image'); //图片修改状态
+      that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
+      that.canvasDemoCtx.drawImage(that.initialImg,0,0,this.width,this.height,x,y,node.a,node.b);  
+      that.ImageData.splice(0);
+      that.canvasDemo.style.zIndex = 1001; 
+
+      dottedBox.call(that, x, y, x + node.a, y + node.b);
+    }  
   }
 }
 
@@ -137,9 +150,9 @@ export function saveImagMapping(){  //图片保存函数
   return canvasTemporarily;
 }
 
-export function saveImag(canvasTemporarily, name, url){
+export function saveImag(canvasTemporarily, name){
   const type = 'png';
-  let imgdata = url || canvasTemporarily.toDataURL(type, 1);
+  let imgdata = canvasTemporarily.toDataURL(type, 1);
   const fixtype = function(type){
     type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
     const r = type.match(/png|jpeg|bmp|gif/)[0];
@@ -179,13 +192,13 @@ export function graffiti(x, y){  //绘制路径记录上一个点坐标，然后
   }
 }
 
-export async function updownImage(x, y){  //保存图片的数据
+export function updownImage(x, y){  //保存图片的数据
   if(x.length !== 0){   //通过保存base64编码的形式来保存图片数据，这样不会使得保存的数组过大
     const forwarddatenode = x.pop();
     y.push(this.canvasVideo.toDataURL('image/png', 1));  //将当前的canvas数据保存在数组里
     const img = new Image();
     img.src = forwarddatenode;
-    img.addEventListener('load', function(){
+    img.addEventListener('load', ()=>{
       this.canvasVideoCtx.drawImage(img, 0, 0);  //将当前canvas数据替换为数组中的canvas数据
     })
   }
