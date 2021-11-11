@@ -96,6 +96,7 @@
                             <use xlink:href="#icon-chushihua1"></use>
                         </svg>
                     </li>
+
                     <li title="撤销">
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-weibiaoti545"></use>
@@ -411,6 +412,23 @@
         </div>
     </dialog>
 
+    <dialog id="warning2">
+        <div class="model">
+			<div class="model-header">
+				<span>警告框</span>
+				<span class="close">×</span>
+			</div>
+			<div class="splitter-right"></div>
+			<div class="model-content">
+				<p>是否将当前画布重置为透明</p>
+			</div>
+			<div class="model-footer">
+				<button  value="cancel">取&nbsp;消</button>
+				<button id="acceptWarning2">确&nbsp;定</button>
+			</div>
+		</div>
+    </dialog>
+
     <template id="txbh-template">
 		<div id="txhb-panel" class="panel">
             <div>
@@ -495,11 +513,7 @@
 		<div id="xpc-panel" class="panel">
 			<div>
 				<label for="xpc-size">大小：</label>
-				<input type="range" id="xpc-size" min="1" max="30" value="3" step="1" />
-			</div>
-			<div>
-				<label for="xpc-power">力度：</label>
-				<input type="range" id="xpc-power" min="0" max="1" value="0.7" step="0.01" />
+				<input type="range" id="xpc-size" min="2" max="32" value="6" step="1" />
 			</div>
 		</div>
 	</template>
@@ -618,6 +632,14 @@
                         <use xlink:href="#icon-tx-fill-changfangxing"></use>
                     </svg>
                     &nbsp;&nbsp;重置为白板
+                </span>
+			</div>
+            <div>
+				<span>
+                    <svg class="icon" aria-hidden="true" style="font-size: 15px;">
+                        <use xlink:href="#icon-tx-fill-changfangxing"></use>
+                    </svg>
+                    &nbsp;&nbsp;重置为透明
                 </span>
 			</div>
 		</div>

@@ -1,6 +1,6 @@
 //主类，用来初始化以及保存获取到的数据
 import {whiteBoard} from './constants/image.js';
-import {contentInit,protote,_$,$,canvasDemoInit,Get} from './constants/config.js'
+import {contentInit,protote,_$,$,canvasDemoInit,Get, canvasICOInit} from './constants/config.js'
 
 'use strict';
 
@@ -17,12 +17,15 @@ export class Tools{
   }
   dataInit(){
     protote();  //设定原型链
+
     this.state = false;   //设定当前操作选项
     this.stateType = 'image';    //设定当前为图像还是视频操作
+    this.stateFrom = false;    //true为透明，false为画板
 
     this.direction = [ 'upper','right','lower','left' ];  //设定操作画布朝向
     this.directionIndex = 0;  //设定操作画布当前朝向
-    this.toolCurrent = '';  //设定当前工具
+    this.toolCurrent = null;  //设定当前工具
+    this.yqtintensity = 30;
 
     this.imageRecord = { w:0, h:0 };
 
@@ -39,7 +42,7 @@ export class Tools{
 
     this.textDottedLine = { clinet:{x:0,y:0},clinetTo:{x:0,y:0} };  //文本的坐标记录
     this.videoBarragePlot = { x: -1, y : -1 };    //弹幕画布坐标系统
-    this.textValue = '';  //记录textarea输入框的输入内容
+    this.textValue = null;  //记录textarea输入框的输入内容
     this.typebullet = 'top';
     this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
     this.imageAttribute = Array.from({length:4},x=>0); //分别为图像长宽与起使点
@@ -48,7 +51,7 @@ export class Tools{
     this.videoTimedisplay = $(".timedisplay");    //绑定视频时间显示
     this.videoData = { w:0, h:0 };
     this.eraserStrength = 0.7;
-    this.eraserSize = 3;
+    this.eraserSize = 6;
     this.base = false;
     this.videoIndex = "video";   //判断当前canvas播放类型video表示映射视频，canvas表示映射图片数组
     this.saveto = [];   //保存视频截取的base64编码图片数组
@@ -57,7 +60,7 @@ export class Tools{
     this.barrageSpeed = 5;
     this.haole = false;
 
-    this.againImageData = '';
+    this.againImageData = null;
 
     this.rotateIF = false;
 
@@ -74,10 +77,10 @@ export class Tools{
     this.reduceWidth = 1;
     this.jq = Array.from({length:4},x=>0); //分别为长宽与起使点
 
-    this.saveImageData = '';
-    this.mainpanelState = '';
+    this.saveImageData = null;
+    this.mainpanelState = null;
     this.progressobarWidth = 0;
-    this.dialog = undefined;
+    this.dialog = null;
     this.imageStatus = 'stroke';
 
     this.videoTimedate = {};
@@ -86,6 +89,9 @@ export class Tools{
     this.bottomDistance = 5;  //字幕距离底边的距离
 
     this.worker = {};
+
+    this.xpcICO = null;
+    this.hbICO = null;
 
     this.tool = [  //工具初始化
       'pencil',   //画笔工具
@@ -102,7 +108,6 @@ export class Tools{
       'text',     //文本工具
       'shear',     //剪切
     ];
-    
     
   }
   //初始化canvas画布
@@ -151,6 +156,14 @@ export class Tools{
     this.canvasTextMapping = document.createElement('canvas');
     this.canvasTextMapping.className = 'canvasStyle';
     this.canvasTextMappingCtx = canvasDemoInit(this.canvasTextMapping,contentW,contentH,'absolute','0');
+
+    //图标保存画布
+    this.canvasICO = document.createElement('canvas');
+    this.canvasICOctx = this.canvasICO.getContext('2d');
+
+    this.xpcICO = canvasICOInit(this.canvasICO, this.canvasICOctx, this.eraserSize, this.eraserSize, 'xpc');
+    this.hbICO = canvasICOInit()
+
 
     parentNode.appendChild(this.canvasVideo);
     parentNode.appendChild(this.canvasBackground);

@@ -1,6 +1,6 @@
 import * as images from './constants/image.js'
 import * as videos from './constants/video.js'
-import {$, _$, on, checkUrl,widthChange, displayChange, Get} from './constants/config.js'
+import {$, _$, on, checkUrl,widthChange, displayChange, Get, canvasICOInit} from './constants/config.js'
 import {Tools} from './index.js'
 
 'use strict';
@@ -23,7 +23,7 @@ class Bind extends Tools{
     const imgs = $('#gridLayer>img');
     const ImageModel = _$('select[title=默认模板]');
     const imageModelindex = _$('#turnPages>div');
-    
+
     imgs.forEach((img)=>{
       on(img, 'dragstart', function(e){
         console.log(e.offsetX, e.offsetY)
@@ -78,6 +78,18 @@ class Bind extends Tools{
       that.dialog.close();
       setTimeout(()=>{
         images.whiteBoard.call(that,that.canvasVideoCtx);
+        that.stateFrom = false;
+      },50);
+    })
+
+    on(_$('#acceptWarning2'), 'click', function(){    //将画布清除绑定
+      widthChange.call(that);
+      that.stateType = 'image';
+      that.backstageVideo.src = '';
+      that.dialog.close();
+      setTimeout(()=>{
+        images.Board.call(that);
+        that.stateFrom = true;
       },50);
     })
 
@@ -88,6 +100,20 @@ class Bind extends Tools{
     })
 
     on(_$('input[name=ImageFile]'), 'input', function(e){    //导入图片
+      if(that.stateType === 'video'){
+        _$('#player').style.display = 'none';   //拉起进度条
+        _$('#content').style.height = that.height + 'px';  //修改画布容器的高度
+        that.height += 40;    //修改高度，因为和图片不同需要有一个进度条，所以得修改高度
+        Array.from($('#contains>canvas')).forEach((index)=>{  //修改画布的高度
+          index.height = that.height;
+        }) 
+        images.whiteBoard.call(that,that.canvasBackgroundCxt);   //初始化画布
+        window.cancelAnimationFrame(that.ed);
+        that.canvasTextMapping.style.zIndex = -1001; 
+        that.backstageVideo.style.zIndex = -1002;
+        images.whiteBoard.call(that,that.canvasVideoCtx);
+        displayChange(videoControl[1],videoControl[2],videoControl[0]);  //修改右边栏布局
+      }
       images.imageinput.call(that,e);
     });
 
@@ -102,7 +128,6 @@ class Bind extends Tools{
       _$('input[name=ImageFile]').value = '';  //清除选定的图片
       _$('#player').style.display = 'flex';   //拉起进度条
       _$('#content').style.height = that.height + 'px';  //修改画布容器的高度
-
       Array.from($('#contains>canvas')).forEach((index)=>{  //修改画布的高度
         index.height = that.height;
       }) 
@@ -975,8 +1000,8 @@ class Bind extends Tools{
           break;
         }
         case 'bucket':{    //油漆桶
-          let color = _$('#yqt-color').value;    //获取选择的颜色
-          let intensity = _$('#yqt-power').value;    //获取力度
+          let color = that.strokeColor;
+          let intensity = that.yqtintensity;    //获取力度
           let ImageDate = that.canvasVideoCtx.getImageData(0,0,that.width,that.height);
           that.ImageData.push(that.canvasVideo.toDataURL('image/png', 1));
           images.paintBucket(ImageDate, e.layerX, e.layerY, color, intensity);
@@ -1385,6 +1410,7 @@ class Bind extends Tools{
       }
     }
     function xzgjBind(){
+      
       that.canvasVideo.style.cursor = "default";
       if(title === '拾色器'){
         that.canvasVideo.style.cursor = "crosshair";
@@ -1491,7 +1517,8 @@ class Bind extends Tools{
         that.jq = Array.from({length:4},x=>0);
       }
       if(title === '重置画板'){
-        that.dialogBind(_$('#czhb-panel>div'), _$('#warning'));
+        that.dialogBind($('#czhb-panel>div')[0], _$('#warning'));
+        that.dialogBind($('#czhb-panel>div')[1], _$('#warning2'));
       }
       if(title === '画笔'){
         that.paintBrush();
@@ -1500,10 +1527,19 @@ class Bind extends Tools{
         that.colorPickup();
       }
       if(title === '油漆桶'){
+        that.canvasVideo.style.cursor = 'url(./fonts/yqt.jpg),auto';
         _$('#yqt-color').value = that.strokeColor;
+        _$('#yqt-power').value = that.yqtintensity;
+        on(_$('#yqt-color'), 'change', function(){
+          that.strokeColor = this.value;
+        })
+        on(_$('#yqt-power'),'change', function(){
+          that.yqtintensity = this.value;
+        })
         that.paintBucket();
       }
       if(title === '橡皮擦'){
+        that.canvasVideo.style.cursor = `url(${that.xpcICO}),auto`;
         that.rubber();
       }
       if(title === '文本工具'){    
@@ -1559,17 +1595,22 @@ class Bind extends Tools{
     this.toolCurrent = 'bucket';
   }
   rubber(){
+    let time = null;
     const that = this;
-    const xpcsize = _$('#xpc-size'),xpcpower = _$('#xpc-power');
+    const xpcsize = _$('#xpc-size');
     this.state = true;
     this.toolCurrent = 'eraser';
     xpcsize.value = this.eraserSize;
-    xpcpower.value = this.eraserStrength;
     on(xpcsize, 'change', function(){
       that.eraserSize = this.value;
-    })
-    on(xpcpower, 'change', function(){
-      that.eraserStrength = this.value;
+      if(time)clearTimeout(time);
+      time = setTimeout(function(){
+        that.canvasICO.width = that.eraserSize;
+        that.canvasICO.height = that.eraserSize;
+        that.canvasICOctx.strokeRect(0, 0, that.eraserSize, that.eraserSize);
+        that.xpcICO = that.canvasICO.toDataURL('image/png',1);
+        that.canvasVideo.style.cursor = `url(${that.xpcICO}),auto`;
+      }, 200);
     })
   }
   drawStraightLine(Current){

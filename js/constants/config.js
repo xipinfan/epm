@@ -14,6 +14,18 @@ export function on(el, func, use){
   el.addEventListener(func, use);
 }
 
+export function canvasICOInit(canvas, canvasCtx, w, h, type){
+  canvas.width = w;
+  canvas.height = h;
+  if(type === 'xpc'){
+    canvasCtx.strokeRect(0, 0, w, h);
+  }
+  if(type === 'hb'){
+    
+  }
+  return canvas.toDataURL('image/png',1);
+}
+
 export function displayChange(a, b, c){   //修改右边栏显示
   a.style.display = 'none';
   b.style.display = 'none';

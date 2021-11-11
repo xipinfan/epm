@@ -47,7 +47,6 @@ export function imageinput(e, url){    //
         that.imageTransformation();
       }
 
-      that.canvasDemo.style.zIndex = 1001;    //在导入图片之后将图片先放在操作画布上进行操作
       that.drawStraightLine('image'); //图片修改状态
       that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
       that.canvasDemoCtx.drawImage(that.initialImg,0,0,this.width,this.height,x,y,node.a,node.b);  
@@ -55,6 +54,7 @@ export function imageinput(e, url){    //
       that.canvasDemo.style.zIndex = 1001; 
 
       dottedBox.call(that, x, y, x + node.a, y + node.b);
+
     }  
   }
 }
@@ -151,8 +151,9 @@ export function saveImagMapping(){  //图片保存函数
 }
 
 export function saveImag(canvasTemporarily, name){
-  const type = 'png';
-  let imgdata = canvasTemporarily.toDataURL(type, 1);
+  const type = 'jpg';
+  let imgdata = canvasTemporarily.toDataURL(type, 0.1);
+  console.log('panzi')
   const fixtype = function(type){
     type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
     const r = type.match(/png|jpeg|bmp|gif/)[0];
@@ -175,9 +176,16 @@ export function saveImag(canvasTemporarily, name){
 
 //区域方型涂白,橡皮擦函数
 export function eliminate(e){
-  this.canvasVideoCtx.clearRect(e.layerX,e.layerY,this.eraserSize,this.eraserSize);
-  //this.canvasVideoCtx.fillStyle = 'rgba(255,255,255,0)';
-  //this.canvasVideoCtx.fillRect(e.layerX,e.layerY,this.rubberIconSize,this.rubberIconSize);
+  if(this.stateFrom){
+    this.canvasVideoCtx.clearRect(e.layerX,e.layerY,this.eraserSize,this.eraserSize);
+  }
+  else{
+    this.canvasVideoCtx.save();
+    this.canvasVideoCtx.fillStyle = 'rgba(255,255,255)';
+    this.canvasVideoCtx.fillRect(e.layerX,e.layerY,this.eraserSize,this.eraserSize);
+    console.log(e.layerX,e.layerY,this.eraserSize,this.eraserSize)
+    this.canvasVideoCtx.restore();
+  }
 }
 
 //目前已废弃，因为路径的连接有问题，且绘制的点其实为直线，滑动速度快之后会形成一条一条的线
@@ -259,7 +267,6 @@ export function rgbToGray(r, g, b) { // 计算灰度值
 export function drawLine(x1, y1, x2, y2){   //连接路径
   this.canvasVideoCtx.save();
   this.canvasVideoCtx.beginPath();
-  console.log(this.pensize111)
   this.canvasVideoCtx.arc((x1+x2)/2, (y1+y2)/2, this.pensize111, 0, Math.PI*2, true);
   this.canvasVideoCtx.fill();
   this.canvasVideoCtx.stroke();

@@ -370,7 +370,7 @@ footer>span:first-child{
 	background-color: rgb(215, 215, 215);
 }
 
-.buttonLayer>div>input[type=text]{
+.buttonLayer>div>input[type=text],.buttonLayer>input[type=text]{
 	padding: 5px 10px;
 	font-size: 15px;
 	background-color: white;
@@ -550,9 +550,9 @@ dialog{
   box-shadow: 0 0 3px gray;
 	border : 0;
 }
-#warning>.model{
+#warning>.model, #warning2>.model{
 	height: 150px;
-    width: 320px;
+  width: 320px;
 }
 .model{
 	display: flex;
