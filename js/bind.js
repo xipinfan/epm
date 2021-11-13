@@ -1,6 +1,6 @@
 import * as images from './constants/image.js'
 import * as videos from './constants/video.js'
-import {$, _$, on, checkUrl,widthChange, displayChange, Get, canvasICOInit} from './constants/config.js'
+import {$, _$, on, checkUrl,widthChange, displayChange, Get, canvasICOInit, getJSON} from './constants/config.js'
 import {Tools} from './index.js'
 
 'use strict';
@@ -26,7 +26,6 @@ class Bind extends Tools{
 
     imgs.forEach((img)=>{
       on(img, 'dragstart', function(e){
-        console.log(e.offsetX, e.offsetY)
         e.dataTransfer.setData('url', e.target.src);
         e.dataTransfer.setData('offsetX',e.offsetX / 100);
         e.dataTransfer.setData('offsetY',e.offsetY / 100);
@@ -34,17 +33,15 @@ class Bind extends Tools{
     })
     on(ImageModel, 'change', function(){
       if(this.value !== '无'){
-        Get(`http://localhost:${that.nodeServerPort}/add?cate2=${this.value}`, function(){
-          if(this.readyState === 4){
+        getJSON(`/add?cate2=${this.value}`).then(function(e){
+          that.searchImage = JSON.parse(e) || [];
             imageModelindex.innerHTML = 1;
-            that.searchImage = JSON.parse(this.responseText) || [];
             that.searchImage.map((e)=>{
               e.image_url = e.path;
               delete e.path;
             })
             _$('#turnPages>div').innerHTML = '1';
             imgAssignment(0);
-          }
         })
       }
     })
@@ -398,16 +395,15 @@ class Bind extends Tools{
         return;
       }
       ImageModel.value = '无';
-      Get( `http://localhost:${that.nodeServerPort}/item?keyword=${value}`, function(){
-        if(this.readyState === 4){
+      getJSON(`/item?keyword=${value}`).then(function(e){
+
+        that.searchImage = JSON.parse(e).data.list || [];
           imageModelindex.innerHTML = 1;
-          that.searchImage = JSON.parse(this.responseText).data.list || [];
           _$('#turnPages>div').innerHTML = '1';
           while(that.searchImage.length && that.searchImage[0].width != undefined){
             that.searchImage.shift();
           }
           imgAssignment(0);
-        }
       })
     })
 
@@ -449,11 +445,6 @@ class Bind extends Tools{
       imgs.forEach((e,index)=>{
         try{
           e.style.opacity = 1;
-          // Get(`http://localhost:8059/base64?url=${that.searchImage[index + ad].image_url}`, function(){
-          //   if(this.readyState === 4){
-          //     console.log(JSON.parse(this.responseText) || []);
-          //   }
-          // })
           e.src = that.searchImage[index + ad].image_url;
         }
         catch{
@@ -666,25 +657,6 @@ class Bind extends Tools{
             that.backstageVideo.pause();   //暂停视频
             that.backstageVideo.style.display = 'none';
             that.backstageVideo.currentTime = that.videoTimedate.begin;   //修改视频的进度
-
-            //通过promis和定时器切断来对视频进行分段截取图片，截取后的图片保存为图片数组进行修改
-            // await (async ()=>{
-            //   for(let j = that.videoTimedate.begin ; j <= that.videoTimedate.end; j += 1/that.fps){
-            //     await new Promise((resolve)=>{
-            //       that.backstageVideo.currentTime = j;
-            //       setTimeout(()=>{
-            //         Promise.all([
-            //           createImageBitmap(that.backstageVideo, 0, 0, that.videoInitial.width, that.videoInitial.height)
-            //         ]).then(function(sprites){
-            //           that.saveto.push(sprites[0]);
-            //           resolve();
-            //         })
-            //         resolve();
-            //       },0); 
-            //     })
-            //   }  
-            // })();
-            // that.saveto.push(that.saveto.unshift());
 
             that.backstageVideo.style.display = '';
             that.videoIndex = "canvas";
@@ -1074,25 +1046,40 @@ class Bind extends Tools{
       e.preventDefault();
       const event = { x:e.layerX, y: e.layerY };
       const afterPlot = { x:e.dataTransfer.getData('offsetX'), y:e.dataTransfer.getData('offsetY')};
-      that.initialImg.src = e.dataTransfer.getData('url');
-      that.initialImg.onload = function(eve){
-        that.canvasDemo.style.zIndex = 1003;
+      that.dialog = _$('#imageonload');
+      that.dialog.showModal();
+      getJSON(`/base64?url=${e.dataTransfer.getData('url')}`)
+        .catch(function(error){
+          alert('图片加载出错')
+        })
+        .then(function(jsonText){
+          return new Promise(function(resolve){
+            that.initialImg.src = 'data:image/png;base64,' + jsonText;
+            that.initialImg.onload = function(eve){
+              that.canvasDemo.style.zIndex = 1003;
 
-        [ firstplot.x, firstplot.y, endplot.x, endplot.y ] = 
-          [ event.x - this.width * afterPlot.x , event.y - this.height * afterPlot.y,
-             event.x + this.width - this.width * afterPlot.x, event.y + this.height - this.height * afterPlot.y ];
-        
-        [that.imageRecord.w, that.imageRecord.h] = [this.width, this.height];
-        that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
-        that.canvasDemoCtx.drawImage(that.initialImg,0,0,that.imageRecord.w,that.imageRecord.h,
-          firstplot.x,firstplot.y,endplot.x - firstplot.x,endplot.y - firstplot.y);  
-        
-        images.dottedBox.call(that, firstplot.x, firstplot.y, endplot.x, endplot.y);    //虚线提示框
-        that.state = true;
-        that.toolCurrent = 'image';
-        controlnode = false;
-      }
+              [ firstplot.x, firstplot.y, endplot.x, endplot.y ] = 
+                [ event.x - this.width * afterPlot.x , event.y - this.height * afterPlot.y,
+                  event.x + this.width - this.width * afterPlot.x, event.y + this.height - this.height * afterPlot.y ];
+              
+              [that.imageRecord.w, that.imageRecord.h] = [this.width, this.height];
+              that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
+              that.canvasDemoCtx.drawImage(that.initialImg,0,0,that.imageRecord.w,that.imageRecord.h,
+                firstplot.x,firstplot.y,endplot.x - firstplot.x,endplot.y - firstplot.y);  
+              
+              images.dottedBox.call(that, firstplot.x, firstplot.y, endplot.x, endplot.y);    //虚线提示框
+              that.state = true;
+              that.toolCurrent = 'image';
+              controlnode = false;
+              resolve();
+            }  
+          })
+        })
+        .finally(function(e){
+          that.dialog.close();
+        })
     })
+    
 
     on(this.canvasDemo, 'click', ()=>{
       if(this.toolCurrent === 'init'){    //整体初始化
@@ -1213,7 +1200,6 @@ class Bind extends Tools{
       }
     })
     on( this.canvasDemo, 'mouseup', function(e){
-
       if(!that.state)return;
       if(that.penstate){
         endLine.x = e.layerX;
@@ -1268,7 +1254,6 @@ class Bind extends Tools{
       operation = false;
     })
     on( this.canvasDemo, 'mousemove',function(e){
-      console.log(controlnode);
       if(!that.state)return;
       if(controlnode){
         if(that.toolCurrent === 'image'){    //图片处理特殊判断
@@ -1521,6 +1506,7 @@ class Bind extends Tools{
         that.dialogBind($('#czhb-panel>div')[1], _$('#warning2'));
       }
       if(title === '画笔'){
+        that.canvasVideo.style.cursor = `url(${that.hbICO}) ${that.pensize*2} ${that.pensize*2},auto`;
         that.paintBrush();
       }
       if(title === '拾色器'){
@@ -1573,13 +1559,21 @@ class Bind extends Tools{
     _$('#saveGIF-h').value = this.videoInitial.height;
   }
   paintBrush(){
+    let time = null;
     const that = this;
     this.toolCurrent = 'pen';
     this.state = true;
     _$('#hb-size').value = this.pensize111;
     _$('#hb-color').value = this.strokeColor;
     on(_$('#hb-size'),'change',function(){
-      that.pensize111 = this.value;
+      that.pensize = this.value;
+      
+      if(time)clearTimeout(time);
+      time = setTimeout(function(){
+        that.hbICO = canvasICOInit(that.canvasICO, that.canvasICOctx, that.pensize * 2, that.pensize * 2, 'hb', that.pensize);
+        that.canvasVideo.style.cursor = `url(${that.hbICO}) ${that.pensize*2} ${that.pensize*2},auto`;
+      }, 200);
+      console.log(that.pensize)
     })
     on(_$('#hb-color'),'change',function(){
       that.colorAssignment(this.value);
@@ -1942,7 +1936,6 @@ class Bind extends Tools{
     this.textDottedLine.clinetTo.y = y2;
     this.canvasDemoCtx.clearRect(0,0,this.width,this.height);
     images.textTool.call(this, this.textDottedLine, this.canvasDemoCtx, value, 0);
-    console.log(value);
   }
 
   clinetChange(){

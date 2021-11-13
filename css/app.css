@@ -651,14 +651,14 @@ dialog{
 	text-indent: 1em;
 }
 
-dialog[id=speedProgress]{
+#speedProgress, #imageonload{
 	border: 0;
 	border-radius: 0;
   box-shadow: 0 0 0;
 	background-color: #ffffff00;
 }
 
-#speedProgress>div{
+#speedProgress>div, #imageonload>div{
 	display: flex; 
 	flex-direction: column;
 	align-items:center;

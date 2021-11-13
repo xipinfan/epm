@@ -75,7 +75,7 @@ export async function Recording(){  //导出GIF视频函数
   //recordingVideo.call(this);    //mp4视频录制
   const gif = new GIF({
     worker: 4,
-    quality: 10,
+    quality: 0.1,
     width:width,
     height:height,
     workerScript: './js/layer/gif.worker.js'
@@ -129,15 +129,14 @@ export async function Recording(){  //导出GIF视频函数
   })();
   
   gif.on('finished', (blob)=>{
-    console.log(gif);
     clearInterval(setIn);
-    this.dialog.close();
     alert('导出成功!!!!');
     let url = URL.createObjectURL(blob);
     let el = document.createElement('a');
     el.href = url;
-    el.download = _$('#inputTextgif').value;
+    el.download =_$('#inputTextgif>input').value;
     el.click();
+    this.dialog.close();
     that.backstageVideo.style.opacity = '1';
   })
 

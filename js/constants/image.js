@@ -151,9 +151,8 @@ export function saveImagMapping(){  //图片保存函数
 }
 
 export function saveImag(canvasTemporarily, name){
-  const type = 'jpg';
+  const type = 'png';
   let imgdata = canvasTemporarily.toDataURL(type, 0.1);
-  console.log('panzi')
   const fixtype = function(type){
     type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
     const r = type.match(/png|jpeg|bmp|gif/)[0];
@@ -267,9 +266,8 @@ export function rgbToGray(r, g, b) { // 计算灰度值
 export function drawLine(x1, y1, x2, y2){   //连接路径
   this.canvasVideoCtx.save();
   this.canvasVideoCtx.beginPath();
-  this.canvasVideoCtx.arc((x1+x2)/2, (y1+y2)/2, this.pensize111, 0, Math.PI*2, true);
+  this.canvasVideoCtx.arc((x1+x2)/2, (y1+y2)/2, parseInt(this.pensize), 0, Math.PI*2, true);
   this.canvasVideoCtx.fill();
-  this.canvasVideoCtx.stroke();
   this.canvasVideoCtx.restore();
 }
 

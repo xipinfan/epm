@@ -14,14 +14,20 @@ export function on(el, func, use){
   el.addEventListener(func, use);
 }
 
-export function canvasICOInit(canvas, canvasCtx, w, h, type){
-  canvas.width = w;
-  canvas.height = h;
+export function canvasICOInit(canvas, canvasCtx, w, h, type, size){
+  canvas.width = w ;
+  canvas.height = h ;
   if(type === 'xpc'){
     canvasCtx.strokeRect(0, 0, w, h);
   }
   if(type === 'hb'){
-    
+    canvas.width = w * 2;
+    canvas.height = h * 2;
+    canvasCtx.save();
+    canvasCtx.beginPath();
+    canvasCtx.arc( w, h, size , 0, Math.PI*2, true);
+    canvasCtx.fill();
+    canvasCtx.restore();
   }
   return canvas.toDataURL('image/png',1);
 }
@@ -67,14 +73,38 @@ export function canvasDemoInit(canvas, ...item){
 export function Get(url, callback){
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = callback;
-  xhr.open('get', url, true);
+  xhr.open('get','http://www.denggy.top:8058' + url, true);
   xhr.send(null);
+}
+
+export function getJSON(url){
+  const promise = new Promise(function(resolve, reject){
+    const handler = function(){
+      if(this.readyState !== 4){
+        return;
+      }
+      if(this.status === 200){
+        resolve(this.responseText);
+      }
+      else {
+        reject(new Error(this.statusText));
+      }
+    }
+
+    const client = new XMLHttpRequest();
+    client.open("GET",'http://www.denggy.top:8058' + url);
+    client.onreadystatechange = handler;
+    // client.responseType = "json";
+    // client.setRequestHeader("Accept", "application/json");
+    client.send();  
+  })
+
+  return promise;
 }
 
 export function contentInit(content,contentH,contentW){
   content.style.height = contentH + 'px';
   content.style.width = contentW + 'px';
-  // content.style.transformOrigin = '50% 50% 0';
   content.style.position = 'relative';
   content.style.transform = 'scale(1)';
 }

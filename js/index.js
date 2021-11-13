@@ -1,6 +1,6 @@
 //主类，用来初始化以及保存获取到的数据
 import {whiteBoard} from './constants/image.js';
-import {contentInit,protote,_$,$,canvasDemoInit,Get, canvasICOInit} from './constants/config.js'
+import {contentInit,protote,_$,$,canvasDemoInit,getJSON, canvasICOInit} from './constants/config.js'
 
 'use strict';
 
@@ -17,97 +17,99 @@ export class Tools{
   }
   dataInit(){
     protote();  //设定原型链
+    //基础设定
+    {
+      this.state = false;   //设定当前操作选项
+      this.stateType = 'image';    //设定当前为图像还是视频操作
+      this.reduceWidth = 1;    //侧边栏的展开个数
+      this.dialog = null;    //当前打开的dialog
+      this.tool = [  //工具初始化
+        'pencil',   //画笔工具
+        'line',   //直线工具
+        'brush',  //刷子工具
+        'eraser',   //橡皮擦工具
+        'rectangle',//矩形工具
+        'round',  //圆形工具
+        'bucket',   //油漆桶
+        'extract',  //颜色提取器
+        'rightTriangle',//直角三角形
+        'isosceles',  //等腰三角形
+        'diamond',    //菱形
+        'text',     //文本工具
+        'shear',     //剪切
+      ];
+    }
+    //图像设定
+    {
+      this.stateFrom = false;    //true为透明，false为画板 设置画板背景是否透明
+      this.toolCurrent = null;  //设定当前工具
+      this.penstate = false;   //直线绘制判断
+      this.ImageData = [];  //保存每一次绘制的图像
+      this.forwardData = [];  //保存每一次回撤前的图像
+      this.imgIndex = 1;    //当前页面模板图片所在页数
+      this.operationstorage = [];   //保存操作
+      //基础画布设定
+      {
+        this.imageAttribute = Array.from({length:4},x=>0); //分别为图像长宽与起使点
+        this.saveImageData = null;      //当前保存的base64文件
+      }
+      //操作画布设定
+      {
+        this.directionIndex = 0;  //设定操作画布当前朝向
+        this.direction = [ 'upper','right','lower','left' ];  //设定当前操作画布朝向
+        this.imageRecord = { w:0, h:0 };    //保存导入图片的数据
+        this.centralPoint = { x1:-1 , y1:-1 , x2:-1 , y2:-1 };  //图像翻转坐标记录
+        this.textDottedLine = { clinet:{x:0,y:0},clinetTo:{x:0,y:0} };  //文本的坐标记录
+        this.jq = Array.from({length:4},x=>0); //分别为长宽与起使点
 
-    this.state = false;   //设定当前操作选项
-    this.stateType = 'image';    //设定当前为图像还是视频操作
-    this.stateFrom = false;    //true为透明，false为画板
+        this.againImageData = null;   //保存需要剪切的图片
+      }
+      //工具设定
+      {
+        this.xpcICO = null;   //保存橡皮擦的base编码鼠标图片
+        this.hbICO = null;    //保存画笔的base编码鼠标图片
 
-    this.direction = [ 'upper','right','lower','left' ];  //设定操作画布朝向
-    this.directionIndex = 0;  //设定操作画布当前朝向
-    this.toolCurrent = null;  //设定当前工具
-    this.yqtintensity = 30;
-
-    this.imageRecord = { w:0, h:0 };
-
-    this.pensize = 6;  //初始化画笔大小
-    this.pensize111 = 3;  //初始化画笔大小
-    this.strokeColor = '#000000';    //初始化画笔颜色
-    this.penstate = false;   //直线绘制判断
-    this.ImageData = [];  //保存每一次绘制的图像
-    this.forwardData = [];  //保存每一次回撤前的图像
-    this.centralPoint = { x1:-1 , y1:-1 , x2:-1 , y2:-1 };  //图像翻转坐标记录
-
-    this.nodeServerPort = '8059';   //保存当前服务器接口
-    this.imgIndex = 1;    //当前页面模板图片所在页数
-
-    this.textDottedLine = { clinet:{x:0,y:0},clinetTo:{x:0,y:0} };  //文本的坐标记录
-    this.videoBarragePlot = { x: -1, y : -1 };    //弹幕画布坐标系统
-    this.textValue = null;  //记录textarea输入框的输入内容
-    this.typebullet = 'top';
-    this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
-    this.imageAttribute = Array.from({length:4},x=>0); //分别为图像长宽与起使点
-    
-    this.progressoafter = $("#progressoafter")[0];    //绑定进度条
-    this.videoTimedisplay = $(".timedisplay");    //绑定视频时间显示
-    this.videoData = { w:0, h:0 };
-    this.eraserStrength = 0.7;
-    this.eraserSize = 6;
-    this.base = false;
-    this.videoIndex = "video";   //判断当前canvas播放类型video表示映射视频，canvas表示映射图片数组
-    this.saveto = [];   //保存视频截取的base64编码图片数组
-    this.barrage = null;   //弹幕参数
-    this.barrageType = '逆轴滚动弹幕';    //滚动形式
-    this.barrageSpeed = 5;
-    this.haole = false;
-
-    this.againImageData = null;
-
-    this.rotateIF = false;
-
-    this.proportion = 1;    //视频与画布缩小比例
-
-    this.barrageData = [];
-    this.barrForwardData = [];
-
-    this.fontSize = 16;
-    this.fontFamily = 'sans-serif';
-    this.fontWeight = '400';
-    this.textStyle = '1';
-
-    this.reduceWidth = 1;
-    this.jq = Array.from({length:4},x=>0); //分别为长宽与起使点
-
-    this.saveImageData = null;
-    this.mainpanelState = null;
-    this.progressobarWidth = 0;
-    this.dialog = null;
-    this.imageStatus = 'stroke';
-
-    this.videoTimedate = {};
-    this.videoInitial = { height:0, width:0 };
-    this.fps = 60;
-    this.bottomDistance = 5;  //字幕距离底边的距离
-
-    this.worker = {};
-
-    this.xpcICO = null;
-    this.hbICO = null;
-
-    this.tool = [  //工具初始化
-      'pencil',   //画笔工具
-      'line',   //直线工具
-      'brush',  //刷子工具
-      'eraser',   //橡皮擦工具
-      'rectangle',//矩形工具
-      'round',  //圆形工具
-      'bucket',   //油漆桶
-      'extract',  //颜色提取器
-      'rightTriangle',//直角三角形
-      'isosceles',  //等腰三角形
-      'diamond',    //菱形
-      'text',     //文本工具
-      'shear',     //剪切
-    ];
+        this.mainpanelState = null;     //当前点击的形状
+        this.imageStatus = 'stroke';    //判断图形是填充还是轮廓
+        this.yqtintensity = 30;    //油漆桶力度 
+        this.pensize = 6;  //初始化画笔大小
+        this.strokeColor = '#000000';    //初始化画笔颜色
+        this.eraserSize = 6;    //橡皮擦大小    
+        this.rotateIF = false;    //判断当前是否翻转
+        this.fontSize = 16;     //字体大小
+        this.fontFamily = 'sans-serif';   //字体样式
+        this.fontWeight = '400';    //字体粗细
+        this.textStyle = '1';   //判断当前是否填充
+      }
+    }
+    //视频设定
+    {
+      this.fps = 60;  //当前gif图帧数
+      this.worker = {};    //导入gif.js的多线程
+      this.haole = false;    //判断当前视频是否是第一次加载
+      this.base = false;    //视频录制状态
+      this.videoData = { w:0, h:0 };     //保存视频修改尺寸信息
+      this.videoInitial = { height:0, width:0 };      //保存视频基础尺寸信息
+      this.proportion = 1;    //视频与画布缩小比例
+      this.videoTimedate = {};      //保存视频时间点
+      this.saveto = [];   //保存视频截取的base64编码图片数组
+      this.progressoafter = $("#progressoafter")[0];    //绑定进度条
+      this.videoTimedisplay = $(".timedisplay");    //绑定视频时间显示  
+      this.progressobarWidth = 0;   //进度条长度
+      this.videoIndex = "video";   //判断当前canvas播放类型video表示映射视频，canvas表示映射图片数组
+      //文字设定
+      {
+        this.barrage = null;   //弹幕参数
+        this.barrageType = '逆轴滚动弹幕';    //滚动形式
+        this.barrageSpeed = 5;    //当前滚动速度
+        this.barrageData = [];    //保存所有弹幕
+        this.barrForwardData = [];    //保存撤回的弹幕
+        this.timeto = setInterval(null,1000);  //设定定时闪烁的提示
+        this.videoBarragePlot = { x: -1, y : -1 };    //弹幕画布坐标系统
+        this.bottomDistance = 5;  //字幕距离底边的距离
+        this.textValue = null;  //记录textarea输入框的输入内容
+      }
+    }
     
   }
   //初始化canvas画布
@@ -131,6 +133,7 @@ export class Tools{
     this.canvasVideo = document.createElement('canvas');
     this.canvasVideoCtx = canvasDemoInit(this.canvasVideo,contentW,contentH,'absolute','1000');
 
+    console.log(this.canvasVideo.toDataURL('image/png',1));
     //设定字幕canvas
     this.canvasSubtitle = document.createElement('canvas');
     this.canvasSubtitleCtx = this.canvasSubtitle.getContext('2d');
@@ -162,8 +165,7 @@ export class Tools{
     this.canvasICOctx = this.canvasICO.getContext('2d');
 
     this.xpcICO = canvasICOInit(this.canvasICO, this.canvasICOctx, this.eraserSize, this.eraserSize, 'xpc');
-    this.hbICO = canvasICOInit()
-
+    this.hbICO = canvasICOInit(this.canvasICO, this.canvasICOctx, this.pensize * 2, this.pensize * 2, 'hb', this.pensize);
 
     parentNode.appendChild(this.canvasVideo);
     parentNode.appendChild(this.canvasBackground);
@@ -207,17 +209,15 @@ export class Tools{
     $('#contains')[0].appendChild(this.backstageVideo);
     this.initialImg = new Image();
     this.initialImg.setAttribute('crossOrigin', 'anonymous')
-    Get(`http://localhost:${this.nodeServerPort}/submit`, function(){
-      if(this.readyState === 4){
-          let expressionModel = JSON.parse(this.responseText) || [];
-          const selectModel = _$('select[title=默认模板]');
-          for(let i of expressionModel){
-            let optionModel = document.createElement('option');
-            optionModel.value = i.cate2;
-            optionModel.innerHTML = i.cate2;
-            selectModel.appendChild(optionModel);
-          }
-        }
+    getJSON(`/submit`).then(function(e){
+      let expressionModel = JSON.parse(e) || [];
+      const selectModel = _$('select[title=默认模板]');
+      for(let i of expressionModel){
+        let optionModel = document.createElement('option');
+        optionModel.value = i.cate2;
+        optionModel.innerHTML = i.cate2;
+        selectModel.appendChild(optionModel);
+      }
     })
   }
 }
