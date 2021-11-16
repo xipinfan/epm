@@ -59,8 +59,20 @@ class Bind extends Tools{
       }
       else{
         if(checkUrl(value)){
-          images.imageinput.call(that,'',value);
-          that.dialog.close();
+          getJSON(`/base64?url=${value}`)
+            .catch(function(error){
+              alert('图片加载出错')
+            })
+            .then(function(jsonText){
+              return new Promise(function(resolve){
+                resolve('data:image/png;base64,' + jsonText)
+              })
+            })
+            .then(async function(e){
+              await images.imageinput.call(that,'',e);
+              that.dialog.close();
+            })
+          
         }
         else{
           alert('该URL不合法');
@@ -68,27 +80,26 @@ class Bind extends Tools{
       }
     })
 
-    on(_$('#acceptWarning'), 'click', function(){    //将画布清除绑定
-      widthChange.call(that);
-      that.stateType = 'image';
-      that.backstageVideo.src = '';
-      that.dialog.close();
-      setTimeout(()=>{
-        images.whiteBoard.call(that,that.canvasVideoCtx);
-        that.stateFrom = false;
-      },50);
+    on(_$('#acceptWarning'), 'click', ()=>{    //将画布清除绑定
+      board(images.whiteBoard);
     })
 
-    on(_$('#acceptWarning2'), 'click', function(){    //将画布清除绑定
+    on(_$('#acceptWarning2'), 'click', ()=>{    //将画布清除绑定
+      board(images.Board);
+    })
+
+    function board( sBoard ){ 
       widthChange.call(that);
       that.stateType = 'image';
       that.backstageVideo.src = '';
       that.dialog.close();
       setTimeout(()=>{
-        images.Board.call(that);
+        that.toolInitTo();
+        sBoard.call(that,that.canvasVideoCtx);
         that.stateFrom = true;
+        
       },50);
-    })
+    }
 
     on(_$('#acceptImage'),'click',function(){    //打开图片结束
       const name = _$('#imageName').value;
@@ -1053,6 +1064,7 @@ class Bind extends Tools{
           alert('图片加载出错')
         })
         .then(function(jsonText){
+          that.toolInitTo();
           return new Promise(function(resolve){
             that.initialImg.src = 'data:image/png;base64,' + jsonText;
             that.initialImg.onload = function(eve){
@@ -1489,6 +1501,8 @@ class Bind extends Tools{
         })
       }
       if(title === '图像属性'){
+        that.toolCurrent = '';
+        that.state = false;
         that.imageTransformation();
       }
       if(title === '剪切'){
@@ -1502,6 +1516,8 @@ class Bind extends Tools{
         that.jq = Array.from({length:4},x=>0);
       }
       if(title === '重置画板'){
+        that.toolCurrent = '';
+        that.state = false;
         that.dialogBind($('#czhb-panel>div')[0], _$('#warning'));
         that.dialogBind($('#czhb-panel>div')[1], _$('#warning2'));
       }
@@ -1563,7 +1579,7 @@ class Bind extends Tools{
     const that = this;
     this.toolCurrent = 'pen';
     this.state = true;
-    _$('#hb-size').value = this.pensize111;
+    _$('#hb-size').value = this.pensize;
     _$('#hb-color').value = this.strokeColor;
     on(_$('#hb-size'),'change',function(){
       that.pensize = this.value;
@@ -1653,7 +1669,10 @@ class Bind extends Tools{
     _$('.intercept').className = 'intercept';
   }
   toolInitTo(){    //工具初始化，取消工具选取使用
-    if(this.node && _$('#main-panel').style.display === 'none'){
+    if( _$('#main-panel').style.display !== 'none'){
+      _$('#main-panel>span').click();
+    }
+    if(this.node){
       this.state = false;    //操作结束
       this.node.className = '';    //当前选择的左侧边栏样式取消
       this.mainpanelState = '';
@@ -1981,4 +2000,4 @@ class Bind extends Tools{
   }
 }
 
-new Bind();
+let dd  = new Bind();

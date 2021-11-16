@@ -133,12 +133,10 @@ export class Tools{
     this.canvasVideo = document.createElement('canvas');
     this.canvasVideoCtx = canvasDemoInit(this.canvasVideo,contentW,contentH,'absolute','1000');
 
-    console.log(this.canvasVideo.toDataURL('image/png',1));
     //设定字幕canvas
     this.canvasSubtitle = document.createElement('canvas');
     this.canvasSubtitleCtx = this.canvasSubtitle.getContext('2d');
     //this.canvasSubtitleCtx = canvasDemoInit(this.canvasSubtitle,contentW,contentH,'absolute','1001');
-
 
     // //设定背景图canvas
     this.canvasBackground = document.createElement('canvas');

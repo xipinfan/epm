@@ -107,7 +107,7 @@ export async function Recording(){  //导出GIF视频函数
               addBarrage.call(that, i, barrage, that.canvasTextMappingCtx, '1');
             }
 
-            gif.addFrame(that.canvasSubtitle, {copy:true, delay:16});
+            gif.addFrame(that.canvasSubtitle, {copy:true, delay:1000/fps});
             if(that.backstageVideo.currentTime + 1/fps > that.videoTimedate.end){
               gif.render();
               progress.innerHTML = `GIF生成中(${gif.nextFrame}/${gif.frames.length})`;
