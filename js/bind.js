@@ -1059,37 +1059,53 @@ class Bind extends Tools{
       const afterPlot = { x:e.dataTransfer.getData('offsetX'), y:e.dataTransfer.getData('offsetY')};
       that.dialog = _$('#imageonload');
       that.dialog.showModal();
-      getJSON(`/base64?url=${e.dataTransfer.getData('url')}`)
-        .catch(function(error){
-          alert('图片加载出错')
-        })
-        .then(function(jsonText){
-          that.toolInitTo();
-          return new Promise(function(resolve){
-            that.initialImg.src = 'data:image/png;base64,' + jsonText;
-            that.initialImg.onload = function(eve){
-              that.canvasDemo.style.zIndex = 1003;
-
-              [ firstplot.x, firstplot.y, endplot.x, endplot.y ] = 
-                [ event.x - this.width * afterPlot.x , event.y - this.height * afterPlot.y,
-                  event.x + this.width - this.width * afterPlot.x, event.y + this.height - this.height * afterPlot.y ];
-              
-              [that.imageRecord.w, that.imageRecord.h] = [this.width, this.height];
-              that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
-              that.canvasDemoCtx.drawImage(that.initialImg,0,0,that.imageRecord.w,that.imageRecord.h,
-                firstplot.x,firstplot.y,endplot.x - firstplot.x,endplot.y - firstplot.y);  
-              
-              images.dottedBox.call(that, firstplot.x, firstplot.y, endplot.x, endplot.y);    //虚线提示框
-              that.state = true;
-              that.toolCurrent = 'image';
-              controlnode = false;
-              resolve();
-            }  
-          })
-        })
-        .finally(function(e){
+      console.log(e.dataTransfer.getData('url'))
+      if(e.dataTransfer.getData('url')[8] !== 'd'){
+        console.log("??");
+        that.initialImg.src = e.dataTransfer.getData('url');
+        that.initialImg.onload = function(){
+          imageChange.call(this);
           that.dialog.close();
-        })
+        }
+      }
+      else{
+        getJSON(`/base64?url=${e.dataTransfer.getData('url')}`)
+          .catch(function(error){
+            alert('图片加载出错')
+          })
+          .then(function(jsonText){
+            that.toolInitTo();
+            return new Promise(function(resolve){
+              that.initialImg.src = 'data:image/png;base64,' + jsonText;
+              that.initialImg.onload = function(eve){
+                imageChange.call(this);
+                resolve();
+              }  
+            })
+          })
+          .finally(function(e){
+            that.dialog.close();
+          })  
+      }
+      
+      function imageChange(){
+        that.canvasDemo.style.zIndex = 1003;
+
+        [ firstplot.x, firstplot.y, endplot.x, endplot.y ] = 
+          [ event.x - this.width * afterPlot.x , event.y - this.height * afterPlot.y,
+            event.x + this.width - this.width * afterPlot.x, event.y + this.height - this.height * afterPlot.y ];
+        
+        [that.imageRecord.w, that.imageRecord.h] = [this.width, this.height];
+        that.canvasDemoCtx.clearRect(0,0,that.width,that.height);
+        that.canvasDemoCtx.drawImage(that.initialImg,0,0,that.imageRecord.w,that.imageRecord.h,
+          firstplot.x,firstplot.y,endplot.x - firstplot.x,endplot.y - firstplot.y);  
+        
+        images.dottedBox.call(that, firstplot.x, firstplot.y, endplot.x, endplot.y);    //虚线提示框
+        that.state = true;
+        that.toolCurrent = 'image';
+        controlnode = false;
+      }
+
     })
     
 
@@ -1124,7 +1140,7 @@ class Bind extends Tools{
         that.penstate = true;    //按下鼠标的标记
       }
       else{
-        if(that.toolCurrent === 'line'){    //划线状态特殊判断
+        if(that.Current === 'line'){    //划线状态特殊判断
           stay = images.spotLineDistance(beginLine, endLine, { x:e.layerX, y:e.layerY });
         }
         else{    //判断矩形框四边
@@ -1269,7 +1285,6 @@ class Bind extends Tools{
       if(!that.state)return;
       if(controlnode){
         if(that.toolCurrent === 'image'){    //图片处理特殊判断
-          console.log("??");
           const node = images.contrast.call(that,that.imageRecord.w,that.imageRecord.h);
           const x = that.width/2-node.a/2, y = that.height/2-node.b/2;
           controlnode = false;

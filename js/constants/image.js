@@ -365,7 +365,6 @@ export function dottedBox(x1, y1, x2, y2){  //虚线提示框
   this.canvasDemoCtx.save();
   const x3 = Math.abs(x1 - x2)/2+Math.min(x1,x2), y3 = Math.abs(y1 - y2)/2+Math.min(y1,y2);
   const path = [{x:x1, y:y1},{x:x2, y:y2},{x:x1, y:y2},{x:x2, y:y1},{x:x1, y:y3},{x:x2, y:y3},{x:x3, y:y1},{x:x3, y:y2}];
-  //this.canvasDemoCtx.fillStyle = '#000';
   
   path.forEach((element)=>{   
     this.canvasDemoCtx.strokeStyle = 'rgba(117,117,117)';
@@ -472,7 +471,6 @@ export function solidRound(canvas, firstplot, endplot){
 }
 //直角三角形
 export function solidTriangle(canvas, firstplot, endplot){
-  console.log(firstplot, endplot)
   const right = { x:firstplot.x, y:endplot.y };
   canvas.beginPath();
   canvas.moveTo(firstplot.x,firstplot.y);  //连接三条边
@@ -582,5 +580,5 @@ export function textTool(textDottedLine, canvas, value, dd){  //绘制文本初�
     }
   }
   canvas.restore();
-  return textQueue.length*this.fontSize;  //判断是否需要伸长框体
+  return textQueue.length * this.fontSize;  //判断是否需要伸长框体
 }

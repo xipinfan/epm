@@ -23,21 +23,6 @@ export class Tools{
       this.stateType = 'image';    //设定当前为图像还是视频操作
       this.reduceWidth = 1;    //侧边栏的展开个数
       this.dialog = null;    //当前打开的dialog
-      this.tool = [  //工具初始化
-        'pencil',   //画笔工具
-        'line',   //直线工具
-        'brush',  //刷子工具
-        'eraser',   //橡皮擦工具
-        'rectangle',//矩形工具
-        'round',  //圆形工具
-        'bucket',   //油漆桶
-        'extract',  //颜色提取器
-        'rightTriangle',//直角三角形
-        'isosceles',  //等腰三角形
-        'diamond',    //菱形
-        'text',     //文本工具
-        'shear',     //剪切
-      ];
     }
     //图像设定
     {
@@ -140,7 +125,7 @@ export class Tools{
 
     // //设定背景图canvas
     this.canvasBackground = document.createElement('canvas');
-    this.canvasBackground.className = 'canvasStyle';
+    //this.canvasBackground.className = 'canvasStyle';
     this.canvasBackground.style.border = '2px solid #f1f1f1'
     this.canvasBackgroundCxt = canvasDemoInit(this.canvasBackground,contentW,contentH,'absolute','-1');
 
@@ -150,12 +135,12 @@ export class Tools{
 
     //设置操作画布
     this.canvasDemo = document.createElement('canvas');
-    this.canvasDemo.className = 'canvasStyle';
+    //this.canvasDemo.className = 'canvasStyle';
     this.canvasDemoCtx = canvasDemoInit(this.canvasDemo,contentW,contentH,'absolute','1');
 
     //设置视频文字映射画布
     this.canvasTextMapping = document.createElement('canvas');
-    this.canvasTextMapping.className = 'canvasStyle';
+    //this.canvasTextMapping.className = 'canvasStyle';
     this.canvasTextMappingCtx = canvasDemoInit(this.canvasTextMapping,contentW,contentH,'absolute','0');
 
     //图标保存画布
